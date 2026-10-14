@@ -122,15 +122,52 @@ class InventoryController
         exit;
     }
 
+    public function updateStock(): void
+    {
+        $productId = trim((string)($_POST['id'] ?? ($_POST['productId'] ?? '')));
+        $qty = (int)($_POST['qty'] ?? ($_POST['quantity'] ?? 0));
+
+        if ($productId === '' || $qty === 0) {
+            Session::setFlash('error', 'Jumlah perubahan stok tidak boleh 0.');
+            header('Location: ?page=inventory');
+            exit;
+        }
+
+        if ($qty > 0) {
+            $resp = $this->api->post('/inventory/receipts', [
+                'productId' => $productId,
+                'quantity' => $qty,
+                'source' => 'Penyesuaian dari POS',
+                'notes' => 'Tambah stok via katalog'
+            ]);
+        } else {
+            $resp = $this->api->post('/inventory/adjustments', [
+                'productId' => $productId,
+                'quantity' => -$qty,
+                'type' => 'OUT_DAMAGED',
+                'reason' => 'Koreksi pengurangan stok dari POS'
+            ]);
+        }
+
+        if ($resp->isSuccess()) {
+            Session::setFlash('success', 'Stok berhasil diperbarui.');
+        } else {
+            Session::setFlash('error', 'Gagal memperbarui stok: ' . ($resp->getErrorMessage() ?? 'Kesalahan server'));
+        }
+
+        header('Location: ?page=inventory');
+        exit;
+    }
+
     public function createProduct(): void
     {
-        $barcode = trim((string)($_POST['barcode'] ?? ''));
+        $barcode = trim((string)($_POST['sku'] ?? ($_POST['barcode'] ?? '')));
         $name = trim((string)($_POST['name'] ?? ''));
-        $categoryId = trim((string)($_POST['categoryId'] ?? ''));
-        $buyPrice = (int)($_POST['buyPrice'] ?? 0);
-        $sellPrice = (int)($_POST['sellPrice'] ?? 0);
-        $initialStock = (int)($_POST['initialStock'] ?? 0);
-        $minStock = (int)($_POST['minStock'] ?? 5);
+        $categoryId = trim((string)($_POST['cat'] ?? ($_POST['categoryId'] ?? '')));
+        $buyPrice = (int)($_POST['buy'] ?? ($_POST['buyPrice'] ?? 0));
+        $sellPrice = (int)($_POST['sell'] ?? ($_POST['sellPrice'] ?? 0));
+        $initialStock = (int)($_POST['stock'] ?? ($_POST['initialStock'] ?? 0));
+        $minStock = (int)($_POST['min'] ?? ($_POST['minStock'] ?? 5));
 
         if ($barcode === '' || $name === '' || $sellPrice <= 0) {
             Session::setFlash('error', 'Nama barang, barcode, dan harga jual wajib diisi.');
@@ -145,7 +182,7 @@ class InventoryController
             'buyPrice' => $buyPrice,
             'sellPrice' => $sellPrice,
             'initialStock' => $initialStock,
-            'minStock' => $minStock
+            'minStock' => $minStock,
         ]);
 
         if ($resp->isSuccess()) {

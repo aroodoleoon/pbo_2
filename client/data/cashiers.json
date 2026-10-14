@@ -1,0 +1,26 @@
+[
+    {
+        "id": "kasir1",
+        "name": "Kasir Shift 1",
+        "role": "kasir",
+        "shift": "Pagi",
+        "active": true,
+        "created": "2026-10-14"
+    },
+    {
+        "id": "kasir2",
+        "name": "Kasir Shift 2",
+        "role": "kasir",
+        "shift": "Siang",
+        "active": true,
+        "created": "2026-10-14"
+    },
+    {
+        "id": "kasir3",
+        "name": "Kasir Shift 3",
+        "role": "kasir",
+        "shift": "Malam",
+        "active": false,
+        "created": "2026-10-14"
+    }
+]

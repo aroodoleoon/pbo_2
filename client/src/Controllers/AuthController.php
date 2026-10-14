@@ -49,15 +49,17 @@ class AuthController
 
         $data = $response->getData();
         Session::set('accessToken', $data['accessToken'] ?? 'DUMMY-TOKEN');
-        Session::set('user', $data['user'] ?? [
+        $user = $data['user'] ?? [
             'id' => '11111111-1111-1111-1111-111111111111',
             'name' => $username,
             'username' => $username,
-            'role' => 'CASHIER'
-        ]);
+            'role' => (($_POST['role'] ?? '') === 'manager' || str_contains(strtolower($username), 'admin')) ? 'ADMIN' : 'CASHIER'
+        ];
+        Session::set('user', $user);
 
-        Session::setFlash('success', 'Selamat datang kembali, ' . htmlspecialchars($data['user']['name'] ?? $username));
-        header('Location: ?page=pos');
+        Session::setFlash('success', 'Selamat datang kembali, ' . htmlspecialchars($user['name'] ?? $username));
+        $isManager = strtoupper((string)($user['role'] ?? '')) === 'ADMIN';
+        header('Location: ' . ($isManager ? '?page=reports' : '?page=pos'));
         exit;
     }
 

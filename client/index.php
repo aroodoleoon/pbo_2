@@ -95,6 +95,9 @@ switch ($page) {
     case 'do-inventory-adjust':
         $inventoryCtrl->adjust();
         break;
+    case 'do-update-stock':
+        $inventoryCtrl->updateStock();
+        break;
     case 'do-create-product':
         $inventoryCtrl->createProduct();
         break;
@@ -119,6 +122,15 @@ switch ($page) {
         break;
     case 'do-create-customer':
         $customerCtrl->create();
+        break;
+
+    // Cashier Management Routes (Manager only)
+    case 'cashiers':
+        if (!\PosClient\Session::isLoggedIn()) {
+            header('Location: ?page=login');
+            exit;
+        }
+        require __DIR__ . '/views/cashiers.php';
         break;
 
     default:

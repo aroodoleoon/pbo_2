@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 ?>
-    </main>
+    </section>
+</main>
 </div>
 </body>
 </html>
-

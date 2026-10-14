@@ -168,26 +168,46 @@ class PosController
         $amountPaid = (int)($input['amountPaid'] ?? 0);
 
         $cart = Cart::calculateSummary();
-        if (empty($cart['items'])) {
-            echo json_encode(['success' => false, 'message' => 'Keranjang belanja masih kosong!']);
+        $customerId = $input['customerId'] ?? ($input['cust'] ?? ($cart['customer']['id'] ?? null));
+        if ($customerId === '0' || $customerId === '' || $customerId === 'none') {
+            $customerId = null;
+        }
+
+        $items = [];
+        if (!empty($input['items'])) {
+            foreach ($input['items'] as $it) {
+                $pid = (string)($it['productId'] ?? ($it['id'] ?? ''));
+                $qty = (int)($it['quantity'] ?? ($it['qty'] ?? 1));
+                if ($pid !== '' && $qty > 0) {
+                    $items[] = ['productId' => $pid, 'quantity' => $qty];
+                }
+            }
+        } elseif (!empty($cart['items'])) {
+            $items = array_map(fn($item) => [
+                'productId' => $item['id'],
+                'quantity' => $item['quantity'],
+            ], $cart['items']);
+        }
+
+        if (empty($items)) {
+            echo json_encode(['success' => false, 'ok' => false, 'message' => 'Keranjang belanja masih kosong!']);
             exit;
         }
 
         // 1. Buat keranjang transaksi di backend
         $salePayload = [
-            'customerId' => $cart['customer']['id'] ?? null,
-            'items' => array_map(fn($item) => [
-                'productId' => $item['id'],
-                'quantity' => $item['quantity'],
-            ], $cart['items']),
-            'discountAmount' => $cart['discountAmount'] ?? 0,
+            'customerId' => $customerId,
+            'items' => $items,
+            'discountAmount' => (int)($input['discountAmount'] ?? ($cart['discountAmount'] ?? 0)),
         ];
 
         $saleResp = $this->api->post('/sales', $salePayload);
         if (!$saleResp->isSuccess()) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Gagal membuat penjualan: ' . ($saleResp->getErrorMessage() ?? 'Stok tidak mencukupi')
+                'ok' => false,
+                'message' => 'Gagal membuat penjualan: ' . ($saleResp->getErrorMessage() ?? 'Stok tidak mencukupi'),
+                'msg' => $saleResp->getErrorMessage() ?? 'Stok tidak mencukupi'
             ]);
             exit;
         }
@@ -195,16 +215,18 @@ class PosController
         $saleData = $saleResp->getData();
         $saleId = $saleData['id'] ?? null;
         if (!$saleId) {
-            echo json_encode(['success' => false, 'message' => 'Backend tidak mengembalikan ID transaksi']);
+            echo json_encode(['success' => false, 'ok' => false, 'message' => 'Backend tidak mengembalikan ID transaksi', 'msg' => 'Backend tidak mengembalikan ID transaksi']);
             exit;
         }
 
         // 2. Eksekusi Pembayaran di backend
-        $totalTagihan = (int)($saleData['total'] ?? $cart['total']);
+        $totalTagihan = (int)($saleData['total'] ?? ($cart['total'] ?? 0));
         if ($method === 'CASH' && $amountPaid < $totalTagihan) {
             echo json_encode([
                 'success' => false,
-                'message' => "Uang tunai kurang! Tagihan: Rp " . number_format($totalTagihan, 0, ',', '.') . ", Diberikan: Rp " . number_format($amountPaid, 0, ',', '.')
+                'ok' => false,
+                'message' => "Uang tunai kurang! Tagihan: Rp " . number_format($totalTagihan, 0, ',', '.') . ", Diberikan: Rp " . number_format($amountPaid, 0, ',', '.'),
+                'msg' => "Uang tunai kurang! Tagihan: Rp " . number_format($totalTagihan, 0, ',', '.')
             ]);
             exit;
         }
@@ -212,20 +234,19 @@ class PosController
         $paymentPayload = [
             'method' => $method,
             'amountPaid' => ($method === 'CASH') ? $amountPaid : $totalTagihan,
-            'items' => array_map(fn($item) => [
-                'productId' => $item['id'],
-                'quantity' => $item['quantity'],
-            ], $cart['items']),
-            'discountAmount' => $cart['discountAmount'] ?? 0,
-            'taxAmount' => $cart['taxAmount'] ?? 0,
-            'customerId' => $cart['customer']['id'] ?? null,
+            'items' => $items,
+            'discountAmount' => (int)($saleData['discountAmount'] ?? ($cart['discountAmount'] ?? 0)),
+            'taxAmount' => (int)($saleData['taxAmount'] ?? ($cart['taxAmount'] ?? 0)),
+            'customerId' => $customerId,
         ];
 
         $payResp = $this->api->post("/sales/{$saleId}/payments", $paymentPayload);
         if (!$payResp->isSuccess()) {
             echo json_encode([
                 'success' => false,
-                'message' => 'Pembayaran gagal: ' . ($payResp->getErrorMessage() ?? 'Gagal memproses metode ' . $method)
+                'ok' => false,
+                'message' => 'Pembayaran gagal: ' . ($payResp->getErrorMessage() ?? 'Gagal memproses metode ' . $method),
+                'msg' => 'Pembayaran gagal: ' . ($payResp->getErrorMessage() ?? 'Gagal memproses metode ' . $method)
             ]);
             exit;
         }
@@ -237,8 +258,11 @@ class PosController
 
         echo json_encode([
             'success' => true,
+            'ok' => true,
             'sale' => $saleData,
             'payment' => $paymentData,
+            'total' => $paymentData['total'] ?? $totalTagihan,
+            'change' => $paymentData['changeAmount'] ?? max(0, $amountPaid - $totalTagihan),
             'message' => 'Transaksi berhasil diselesaikan!'
         ]);
         exit;

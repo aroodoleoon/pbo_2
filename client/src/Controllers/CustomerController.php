@@ -49,8 +49,8 @@ class CustomerController
     public function create(): void
     {
         $name = trim((string)($_POST['name'] ?? ''));
-        $contact = trim((string)($_POST['contact'] ?? ''));
-        $asMember = isset($_POST['asMember']);
+        $contact = trim((string)($_POST['contact'] ?? ($_POST['phone'] ?? '')));
+        $asMember = isset($_POST['asMember']) ? (bool)$_POST['asMember'] : true;
 
         if ($name === '' || $contact === '') {
             Session::setFlash('error', 'Nama dan kontak pelanggan wajib diisi.');

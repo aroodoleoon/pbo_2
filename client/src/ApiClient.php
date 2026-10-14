@@ -83,7 +83,7 @@ class ApiClient
         $rawBody = curl_exec($ch);
         $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curlError = curl_error($ch);
-        curl_close($ch);
+        @curl_close($ch);
 
         if ($rawBody === false) {
             return new ApiResponse(0, false, null, "Koneksi ke backend Ktor gagal: " . ($curlError ?: 'Server offline'));
