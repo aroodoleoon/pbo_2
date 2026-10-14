@@ -95,6 +95,7 @@ class BarangRepository(private val dataSource: DataSource) {
             c.prepareStatement(sql).use { s ->
                 s.setString(1, barang.id)
                 s.setString(2, barang.kode)
+                s.setString(3, barang.nama)
                 if (barang.kategoriId != null) {
                     s.setString(4, barang.kategoriId)
                 } else {
@@ -119,6 +120,7 @@ class BarangRepository(private val dataSource: DataSource) {
         dataSource.connection.use { c ->
             c.prepareStatement(sql).use { s ->
                 s.setString(1, barang.kode)
+                s.setString(2, barang.nama)
                 if (barang.kategoriId != null) {
                     s.setString(3, barang.kategoriId)
                 } else {
