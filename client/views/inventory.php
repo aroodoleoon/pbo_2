@@ -31,6 +31,11 @@ require __DIR__ . '/layout/header.php';
             <p class="font-body-md text-body-md text-on-surface-variant">Kelola harga beli/jual, audit stok fisik, dan peringatan restok otomatis terintegrasi.</p>
         </div>
         <div class="flex items-center gap-space-md flex-wrap">
+            <button type="button" onclick="openAddCategoryModal()"
+                    class="inline-flex items-center gap-space-sm px-space-md py-space-sm rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md font-semibold hover:bg-surface-container transition-all shadow-sm">
+                <span class="material-symbols-outlined text-[20px] text-primary">category</span>
+                <span>+ Kategori Baru</span>
+            </button>
             <button type="button" onclick="openAddProductModal()"
                     class="inline-flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:bg-primary transition-all shadow-md hover:shadow-lg">
                 <span class="material-symbols-outlined text-[20px]">add</span>
@@ -322,8 +327,11 @@ require __DIR__ . '/layout/header.php';
                     <input type="text" name="barcode" required class="w-full px-3 py-2 bg-surface-container-low rounded-lg text-on-surface font-mono text-sm outline-none" placeholder="899886620025"/>
                 </div>
                 <div class="flex flex-col gap-1">
-                    <label class="text-xs font-bold uppercase text-outline">Kategori</label>
-                    <select name="categoryId" class="w-full px-3 py-2 bg-surface-container-low rounded-lg text-on-surface text-sm outline-none">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold uppercase text-outline">Kategori</label>
+                        <button type="button" onclick="openAddCategoryModal()" class="text-[11px] text-primary hover:underline font-semibold">+ Kategori Baru</button>
+                    </div>
+                    <select name="categoryId" id="productCategorySelect" class="w-full px-3 py-2 bg-surface-container-low rounded-lg text-on-surface text-sm outline-none">
                         <option value="">-- Tanpa Kategori --</option>
                         <?php foreach ($categories as $cat): ?>
                         <option value="<?= htmlspecialchars($cat['id']) ?>"><?= htmlspecialchars($cat['name']) ?></option>
@@ -416,7 +424,45 @@ function openAddProductModal() {
 function closeAddProductModal() {
     document.getElementById('addProductModal').classList.add('hidden');
 }
+
+function openAddCategoryModal() {
+    document.getElementById('addCategoryModal').classList.remove('hidden');
+    document.getElementById('categoryNameInput').focus();
+}
+
+function closeAddCategoryModal() {
+    document.getElementById('addCategoryModal').classList.add('hidden');
+}
 </script>
+
+<!-- ================= MODAL TAMBAH KATEGORI BARU ================= -->
+<div class="fixed inset-0 bg-inverse-surface/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="addCategoryModal">
+    <div class="bg-surface-container-lowest rounded-2xl p-6 max-w-md w-full shadow-2xl border border-outline-variant/30 flex flex-col gap-4 animate-in zoom-in-95">
+        <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+            <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[20px]">category</span>
+                </span>
+                <span class="font-headline-md font-bold text-on-surface">Tambah Kategori Baru</span>
+            </div>
+            <button type="button" onclick="closeAddCategoryModal()" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+            </button>
+        </div>
+
+        <form action="?page=do-create-category" method="POST" class="flex flex-col gap-3">
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase text-outline">Nama Kategori</label>
+                <input type="text" name="name" id="categoryNameInput" required class="w-full px-3 py-2 bg-surface-container-low rounded-lg text-on-surface text-sm outline-none focus:ring-2 focus:ring-primary" placeholder="Contoh: Alat Tulis Kantor, Makanan Beku"/>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+                <button type="button" onclick="closeAddCategoryModal()" class="w-1/3 py-2.5 rounded-xl bg-surface-container text-on-surface text-xs font-bold">Batal</button>
+                <button type="submit" class="w-2/3 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs shadow-md">Simpan Kategori</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <?php require __DIR__ . '/layout/foot.php'; ?>
 

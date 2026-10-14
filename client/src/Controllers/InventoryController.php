@@ -157,5 +157,59 @@ class InventoryController
         header('Location: ?page=inventory');
         exit;
     }
+
+    public function createCategory(): void
+    {
+        $name = trim((string)($_POST['name'] ?? ''));
+
+        if ($name === '') {
+            Session::setFlash('error', 'Nama kategori wajib diisi.');
+            header('Location: ?page=inventory');
+            exit;
+        }
+
+        $resp = $this->api->post('/categories', [
+            'name' => $name
+        ]);
+
+        if ($resp->isSuccess()) {
+            Session::setFlash('success', "Kategori baru '{$name}' berhasil ditambahkan.");
+        } else {
+            Session::setFlash('error', 'Gagal menambah kategori: ' . ($resp->getErrorMessage() ?? 'Kategori sudah ada atau terjadi kesalahan.'));
+        }
+
+        header('Location: ?page=inventory');
+        exit;
+    }
+
+    public function apiCreateCategory(): void
+    {
+        header('Content-Type: application/json');
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $name = trim((string)($input['name'] ?? ''));
+
+        if ($name === '') {
+            echo json_encode(['success' => false, 'message' => 'Nama kategori wajib diisi.']);
+            exit;
+        }
+
+        $resp = $this->api->post('/categories', [
+            'name' => $name
+        ]);
+
+        if ($resp->isSuccess()) {
+            echo json_encode([
+                'success' => true,
+                'data' => $resp->getData(),
+                'message' => "Kategori '{$name}' berhasil ditambahkan"
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => $resp->getErrorMessage() ?? 'Gagal membuat kategori'
+            ]);
+        }
+        exit;
+    }
 }
 

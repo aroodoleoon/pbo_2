@@ -98,6 +98,12 @@ switch ($page) {
     case 'do-create-product':
         $inventoryCtrl->createProduct();
         break;
+    case 'do-create-category':
+        $inventoryCtrl->createCategory();
+        break;
+    case 'api-create-category':
+        $inventoryCtrl->apiCreateCategory();
+        break;
 
     // Reports & Analytics Routes
     case 'reports':
