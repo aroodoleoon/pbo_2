@@ -190,4 +190,4 @@ pbo_2/
 * **Alex** — Modul 2: Inventaris & Audit Pergerakan Stok
 * **Dapin** — Modul 3: Transaksi Kasir POS & Snapshot Keranjang
 * **Dhia** — Modul 4: Karyawan, Autentikasi, & Program Loyalitas Member
-* **Josua** — Modul 5: Sistem Pembayaran, Database, & Laporan Penjualan
+* **Josua** — Modul 5: Sistem Pembayaran, Database, & Laporan Penjualan 

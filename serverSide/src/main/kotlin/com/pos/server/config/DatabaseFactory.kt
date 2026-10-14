@@ -13,12 +13,21 @@ object DatabaseFactory {
             ds.setURL(config.url)
             ds.user = config.user
             ds.password = config.pass
-            ds.setProperty("stringtype", "unspecified")
 
-            // Test connection & migrate if necessary
+            // Test connection & migrate schema
             ds.connection.use { c ->
                 println("[DATABASE] Berhasil terhubung ke PostgreSQL: ${config.url}")
-                migratePostgresIfNeeded(c)
+                try {
+                    // Auto-heal: Ubah tipe UUID ke VARCHAR jika tabel sebelumnya dibuat dengan draft UUID lama
+                    c.createStatement().use { s ->
+                        s.execute("ALTER TABLE IF EXISTS detail_transaksi ALTER COLUMN barang_id TYPE VARCHAR(80);")
+                        s.execute("ALTER TABLE IF EXISTS pergerakan_stok ALTER COLUMN barang_id TYPE VARCHAR(80);")
+                        s.execute("ALTER TABLE IF EXISTS barang ALTER COLUMN id TYPE VARCHAR(80);")
+                        s.execute("ALTER TABLE IF EXISTS barang ALTER COLUMN kategori_id TYPE VARCHAR(80);")
+                        s.execute("ALTER TABLE IF EXISTS kategori_barang ALTER COLUMN id TYPE VARCHAR(80);")
+                    }
+                } catch (_: Exception) {}
+                initSchemaAndSeed(c)
             }
             ds
         } catch (e: Exception) {
@@ -184,67 +193,6 @@ object DatabaseFactory {
                     stmt.execute(clean)
                 }
             }
-        }
-    }
-
-    private fun migratePostgresIfNeeded(connection: Connection) {
-        try {
-            connection.createStatement().use { s ->
-                s.execute("""
-                    DO $$ 
-                    BEGIN
-                        IF EXISTS (
-                            SELECT 1 FROM information_schema.columns 
-                            WHERE table_name = 'barang' AND column_name = 'id' AND data_type = 'uuid'
-                        ) THEN
-                            ALTER TABLE barang DROP CONSTRAINT IF EXISTS barang_kategori_id_fkey;
-                            ALTER TABLE member DROP CONSTRAINT IF EXISTS member_pelanggan_id_fkey;
-                            ALTER TABLE transaksi DROP CONSTRAINT IF EXISTS transaksi_kasir_id_fkey;
-                            ALTER TABLE transaksi DROP CONSTRAINT IF EXISTS transaksi_pelanggan_id_fkey;
-                            ALTER TABLE detail_transaksi DROP CONSTRAINT IF EXISTS detail_transaksi_transaksi_id_fkey;
-                            ALTER TABLE detail_transaksi DROP CONSTRAINT IF EXISTS detail_transaksi_barang_id_fkey;
-                            ALTER TABLE pembayaran DROP CONSTRAINT IF EXISTS pembayaran_transaksi_id_fkey;
-                            ALTER TABLE pergerakan_stok DROP CONSTRAINT IF EXISTS pergerakan_stok_barang_id_fkey;
-                            ALTER TABLE pergerakan_stok DROP CONSTRAINT IF EXISTS pergerakan_stok_karyawan_id_fkey;
-                            ALTER TABLE audit_logs DROP CONSTRAINT IF EXISTS audit_logs_actor_id_fkey;
-
-                            ALTER TABLE karyawan ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE kategori_barang ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE barang ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE barang ALTER COLUMN kategori_id TYPE VARCHAR(80);
-                            ALTER TABLE pelanggan ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE member ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE member ALTER COLUMN pelanggan_id TYPE VARCHAR(80);
-                            ALTER TABLE transaksi ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE transaksi ALTER COLUMN kasir_id TYPE VARCHAR(80);
-                            ALTER TABLE transaksi ALTER COLUMN pelanggan_id TYPE VARCHAR(80);
-                            ALTER TABLE detail_transaksi ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE detail_transaksi ALTER COLUMN transaksi_id TYPE VARCHAR(80);
-                            ALTER TABLE detail_transaksi ALTER COLUMN barang_id TYPE VARCHAR(80);
-                            ALTER TABLE pembayaran ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE pembayaran ALTER COLUMN transaksi_id TYPE VARCHAR(80);
-                            ALTER TABLE pergerakan_stok ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE pergerakan_stok ALTER COLUMN barang_id TYPE VARCHAR(80);
-                            ALTER TABLE pergerakan_stok ALTER COLUMN karyawan_id TYPE VARCHAR(80);
-                            ALTER TABLE audit_logs ALTER COLUMN id TYPE VARCHAR(80);
-                            ALTER TABLE audit_logs ALTER COLUMN actor_id TYPE VARCHAR(80);
-
-                            ALTER TABLE barang ADD CONSTRAINT barang_kategori_id_fkey FOREIGN KEY (kategori_id) REFERENCES kategori_barang(id);
-                            ALTER TABLE member ADD CONSTRAINT member_pelanggan_id_fkey FOREIGN KEY (pelanggan_id) REFERENCES pelanggan(id);
-                            ALTER TABLE transaksi ADD CONSTRAINT transaksi_kasir_id_fkey FOREIGN KEY (kasir_id) REFERENCES karyawan(id);
-                            ALTER TABLE transaksi ADD CONSTRAINT transaksi_pelanggan_id_fkey FOREIGN KEY (pelanggan_id) REFERENCES pelanggan(id);
-                            ALTER TABLE detail_transaksi ADD CONSTRAINT detail_transaksi_transaksi_id_fkey FOREIGN KEY (transaksi_id) REFERENCES transaksi(id);
-                            ALTER TABLE detail_transaksi ADD CONSTRAINT detail_transaksi_barang_id_fkey FOREIGN KEY (barang_id) REFERENCES barang(id);
-                            ALTER TABLE pembayaran ADD CONSTRAINT pembayaran_transaksi_id_fkey FOREIGN KEY (transaksi_id) REFERENCES transaksi(id);
-                            ALTER TABLE pergerakan_stok ADD CONSTRAINT pergerakan_stok_barang_id_fkey FOREIGN KEY (barang_id) REFERENCES barang(id);
-                            ALTER TABLE pergerakan_stok ADD CONSTRAINT pergerakan_stok_karyawan_id_fkey FOREIGN KEY (karyawan_id) REFERENCES karyawan(id);
-                            ALTER TABLE audit_logs ADD CONSTRAINT audit_logs_actor_id_fkey FOREIGN KEY (actor_id) REFERENCES karyawan(id);
-                        END IF;
-                    END $$;
-                """)
-            }
-        } catch (e: Exception) {
-            println("[DATABASE MIGRATION NOTICE] ${e.message}")
         }
     }
 }

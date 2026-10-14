@@ -1,12 +1,12 @@
--- Skema Database POS Academic (PostgreSQL & H2 Compatible)
+-- Skema Database POS Academic (PostgreSQL 16/17 & H2 Compatible)
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS karyawan (
     id VARCHAR(80) PRIMARY KEY,
     nama TEXT NOT NULL,
-    username VARCHAR(50) NOT NULL UNIQUE,
+    username TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN', 'CASHIER')),
+    role TEXT NOT NULL CHECK (role IN ('ADMIN', 'CASHIER')),
     aktif BOOLEAN NOT NULL DEFAULT TRUE,
     dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS kategori_barang (
 
 CREATE TABLE IF NOT EXISTS barang (
     id VARCHAR(80) PRIMARY KEY,
-    kode VARCHAR(50) NOT NULL UNIQUE,
+    kode TEXT NOT NULL UNIQUE,
     nama TEXT NOT NULL,
     kategori_id VARCHAR(80) REFERENCES kategori_barang(id),
     harga_beli BIGINT NOT NULL CHECK (harga_beli >= 0),
@@ -32,20 +32,20 @@ CREATE TABLE IF NOT EXISTS barang (
 CREATE TABLE IF NOT EXISTS pelanggan (
     id VARCHAR(80) PRIMARY KEY,
     nama TEXT NOT NULL,
-    kontak VARCHAR(50),
+    kontak TEXT,
     dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS member (
     id VARCHAR(80) PRIMARY KEY,
     pelanggan_id VARCHAR(80) NOT NULL UNIQUE REFERENCES pelanggan(id),
-    nomor_member VARCHAR(50) NOT NULL UNIQUE,
+    nomor_member TEXT NOT NULL UNIQUE,
     poin INTEGER NOT NULL DEFAULT 0 CHECK (poin >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS transaksi (
     id VARCHAR(80) PRIMARY KEY,
-    nomor_transaksi VARCHAR(50) NOT NULL UNIQUE,
+    nomor_transaksi TEXT NOT NULL UNIQUE,
     kasir_id VARCHAR(80) NOT NULL REFERENCES karyawan(id),
     pelanggan_id VARCHAR(80) REFERENCES pelanggan(id),
     subtotal BIGINT NOT NULL DEFAULT 0 CHECK (subtotal >= 0),
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS transaksi (
     pajak BIGINT NOT NULL DEFAULT 0 CHECK (pajak >= 0),
     total BIGINT NOT NULL DEFAULT 0 CHECK (total >= 0),
     keterangan_syarat_diskon TEXT,
-    status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELLED')),
+    status TEXT NOT NULL CHECK (status IN ('PENDING', 'COMPLETED', 'CANCELLED')),
     dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -69,10 +69,10 @@ CREATE TABLE IF NOT EXISTS detail_transaksi (
 CREATE TABLE IF NOT EXISTS pembayaran (
     id VARCHAR(80) PRIMARY KEY,
     transaksi_id VARCHAR(80) NOT NULL UNIQUE REFERENCES transaksi(id),
-    metode VARCHAR(20) NOT NULL CHECK (metode IN ('CASH', 'QRIS', 'TRANSFER', 'DEBIT')),
+    metode TEXT NOT NULL CHECK (metode IN ('CASH', 'QRIS', 'TRANSFER', 'DEBIT')),
     nominal_bayar BIGINT NOT NULL CHECK (nominal_bayar >= 0),
     kembalian BIGINT NOT NULL CHECK (kembalian >= 0),
-    status VARCHAR(20) NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'FAILED')),
+    status TEXT NOT NULL CHECK (status IN ('PENDING', 'SUCCESS', 'FAILED')),
     dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS pergerakan_stok (
     id VARCHAR(80) PRIMARY KEY,
     barang_id VARCHAR(80) NOT NULL REFERENCES barang(id),
     karyawan_id VARCHAR(80) NOT NULL REFERENCES karyawan(id),
-    jenis VARCHAR(20) NOT NULL CHECK (jenis IN ('IN', 'OUT', 'ADJUSTMENT')),
+    jenis TEXT NOT NULL CHECK (jenis IN ('IN', 'OUT', 'ADJUSTMENT')),
     jumlah INTEGER NOT NULL CHECK (jumlah > 0),
     alasan TEXT NOT NULL,
     dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT now()
