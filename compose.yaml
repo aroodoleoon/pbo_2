@@ -6,17 +6,51 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-pos_db}
       POSTGRES_USER: ${POSTGRES_USER:-pos_app}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pos_password}
     ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+      - ./database/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pos_app} -d ${POSTGRES_DB:-pos_db}"]
       interval: 5s
-      timeout: 3s
-      retries: 10
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./serverSide
+      dockerfile: Dockerfile
+    container_name: pos-backend
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-pos_db}
+      POSTGRES_USER: ${POSTGRES_USER:-pos_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pos_password}
+      PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: pos-client
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: http://backend:8080/api/v1
+    ports:
+      - "8000:80"
+    depends_on:
+      backend:
+        condition: service_started
 
 volumes:
   postgres_data:

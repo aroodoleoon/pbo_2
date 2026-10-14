@@ -37,7 +37,7 @@ use PosClient\Controllers\CustomerController;
 Session::start();
 
 // 3. Dependency Injection
-$apiClient = new ApiClient(Config::API_BASE_URL);
+$apiClient = new ApiClient(Config::getApiBaseUrl());
 $authCtrl = new AuthController($apiClient);
 $posCtrl = new PosController($apiClient);
 $inventoryCtrl = new InventoryController($apiClient);
