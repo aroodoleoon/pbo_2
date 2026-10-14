@@ -14,3 +14,4 @@ EXPOSE 80
 
 # Start PHP built-in web server
 CMD ["php", "-S", "0.0.0.0:80", "-t", "/app"]
+
