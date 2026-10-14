@@ -2,7 +2,7 @@ package com.pos.server.plugins
 
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
-import io.ktor.server.plugins.calllogging.CallLogging
+import io.ktor.server.plugins.callloging.CallLogging
 import org.slf4j.event.Level
 
 fun Application.configureCallLogging() {
@@ -10,4 +10,3 @@ fun Application.configureCallLogging() {
         level = Level.INFO
     }
 }
-

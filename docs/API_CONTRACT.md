@@ -1,63 +1,49 @@
-# REST API Contract — draft
+# REST API Contract — POS System MVP
 
-Base path: `/api/v1`
-Format request/response: JSON
-Waktu: ISO-8601 UTC
-Nominal uang: integer rupiah
-Error format yang disarankan:
-```json
-{
-  "error": {
-    "code": "INSUFFICIENT_STOCK",
-    "message": "Stok tidak mencukupi",
-    "requestId": "..."
-  }
-}
-```
+> **Dokumentasi Lengkap dengan Request/Response JSON**: Silakan buka [**`docs/API_DOCUMENTATION.md`**](API_DOCUMENTATION.md).
 
-## Auth
-- `POST /auth/login`
-  - Request: `{ "username": "kasir1", "password": "..." }`
-  - Response: `{ "accessToken": "...", "user": { "id": "...", "name": "...", "role": "CASHIER" } }`
-- `POST /auth/logout` (opsional jika strategi token memerlukan invalidasi server)
+## Ringkasan Spesifikasi
+* **Base Path**: `/api/v1`
+* **Format Request & Response**: JSON (`application/json`)
+* **Format Timestamp**: ISO-8601 UTC
+* **Format Uang**: Integer Rupiah (tanpa float/koma)
 
-## Products
-- `GET /products?query=&page=1&pageSize=20`
-- `POST /products` (Admin)
-- `GET /products/{id}`
-- `PATCH /products/{id}` (Admin)
-- `GET /categories`
-- `POST /categories` (Admin)
+---
 
-## Inventory
-- `POST /inventory/receipts` — barang masuk
-- `POST /inventory/adjustments` — penyesuaian stok dengan alasan
-- `GET /inventory/movements?from=&to=&productId=`
+## Ringkasan Endpoint
 
-## Customers
-- `GET /customers?query=` (Admin & Kasir)
-- `POST /customers` (Admin & Kasir — Kasir hanya boleh mendaftarkan pelanggan/member baru)
-- `GET /customers/{id}` (Admin & Kasir)
-- `PATCH /customers/{id}` (Khusus Admin — Kasir dilarang mengubah data pelanggan)
+| Modul | Method | Endpoint | Peran / Hak Akses | Keterangan |
+| :--- | :--- | :--- | :--- | :--- |
+| **Auth** | `POST` | `/auth/login` | Publik | Login Admin / Kasir |
+| | `POST` | `/auth/logout` | Terautentikasi | Keluar dari sesi |
+| **Kategori** | `GET` | `/categories` | Admin & Kasir | Daftar kategori barang |
+| | `POST` | `/categories` | Khusus Admin | Tambah kategori baru |
+| **Produk** | `GET` | `/products` | Admin & Kasir | Ambil semua produk / pencarian |
+| | `POST` | `/products` | Khusus Admin | Tambah produk baru dengan barcode |
+| | `GET` | `/products/{id}` | Admin & Kasir | Detail spesifik produk |
+| | `PATCH`| `/products/{id}` | Khusus Admin | Ubah harga atau info barang |
+| **Inventaris** | `POST` | `/inventory/receipts` | Admin | Penerimaan barang masuk gudang |
+| | `POST` | `/inventory/adjustments` | Admin | Penyesuaian barang rusak / hilang |
+| | `GET` | `/inventory/movements` | Admin | Riwayat audit pergerakan stok |
+| | `GET` | `/inventory/low-stock` | Admin & Kasir | Daftar barang dengan stok menipis |
+| **Pelanggan** | `GET` | `/customers` | Admin & Kasir | Ambil pelanggan / cari member |
+| | `POST` | `/customers` | Admin & Kasir | Daftarkan pelanggan / member baru |
+| | `GET` | `/customers/{id}` | Admin & Kasir | Detail pelanggan |
+| | `PATCH`| `/customers/{id}` | Khusus Admin | Ubah data pelanggan |
+| **Penjualan** | `POST` | `/sales` | Kasir & Admin | Buat keranjang belanja & hitung total |
+| | `POST` | `/sales/{id}/payments` | Kasir & Admin | Bayar tunai / QRIS / Transfer / Debit |
+| | `POST` | `/payments/cash` | Kasir & Admin | Pembayaran tunai atomik instan |
+| **Laporan** | `GET` | `/transactions` | Admin & Kasir | Riwayat seluruh transaksi |
+| | `GET` | `/reports/sales` | Khusus Admin | Laporan penjualan harian/periode |
 
-## Sales
-- `POST /sales`
-  - Request draft:
-    `{ "customerId": null, "items": [{ "productId": "...", "quantity": 2 }] }`
-  - Server membaca harga dan stok dari PostgreSQL (`stok >= 0`), mengecek syarat diskon/pajak, serta menyimpan keterangannya; client tidak boleh menentukan harga final.
-- `GET /sales?from=&to=&page=1&pageSize=20`
-- `GET /sales/{id}`
+---
 
-## Payments
-- `POST /sales/{id}/payments`
-  - Metode yang didukung (`method`): `"CASH" | "QRIS" | "TRANSFER" | "DEBIT"`
-  - Request contoh: `{ "method": "CASH", "amountPaid": 50000 }`
-  - Server menghitung total akhir (`subtotal - diskon + pajak`) dan kembalian (`0` untuk non-tunai), lalu menyimpan pembayaran serta mengurangi stok secara atomik.
-- `GET /reports/sales?from=&to=`
-
-## Ketentuan
-- Semua endpoint kecuali login memerlukan autentikasi.
-- Role/izin diperiksa di server.
-- Gunakan status HTTP yang konsisten: 200/201, 400, 401, 403, 404, 409, 500.
-- Idempotency key untuk proses pembayaran direkomendasikan agar retry tidak membuat transaksi ganda.
-- Kontrak ini draft; implementasi final harus ditinjau bersama seluruh anggota sebelum coding.
+## Standar Kode Respons HTTP
+* `200 OK`: Permintaan berhasil diproses.
+* `201 Created`: Data baru berhasil disimpan.
+* `400 Bad Request`: Input validasi gagal atau data tidak lengkap.
+* `401 Unauthorized`: Kredensial login tidak cocok.
+* `403 Forbidden`: Pengguna tidak memiliki izin role yang sesuai.
+* `404 Not Found`: Entitas tidak ditemukan.
+* `409 Conflict`: Konflik data (misal: stok tidak mencukupi).
+* `500 Internal Error`: Kesalahan sistem atau database.

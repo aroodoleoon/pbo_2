@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.serialization") version "2.0.21"
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
     application
 }
 
@@ -29,6 +29,7 @@ dependencies {
 
     // Database & Driver
     implementation("org.postgresql:postgresql:42.7.4")
+    implementation("com.h2database:h2:2.3.232")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
@@ -42,7 +43,5 @@ tasks.test {
     useJUnitPlatform()
 }
 
-kotlin {
-    jvmToolchain(21)
-}
+
 

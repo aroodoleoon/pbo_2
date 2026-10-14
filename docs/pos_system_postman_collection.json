@@ -1,0 +1,399 @@
+{
+  "info": {
+    "name": "POS System OOP - Automated Test Suite",
+    "description": "Koleksi pengujian otomatis Postman CLI untuk Sistem Kasir Point of Sale (POS) Tubes PBO.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Autentikasi",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"User role is ADMIN\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.user.role).to.eql(\"ADMIN\");",
+                  "    pm.expect(json.accessToken).to.be.a(\"string\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": "http://127.0.0.1:8080/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login Kasir Pagi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"User role is CASHIER\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.user.role).to.eql(\"CASHIER\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"kasir1\",\n  \"password\": \"kasir123\"\n}"
+            },
+            "url": "http://127.0.0.1:8080/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Logout Sesi",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Master Kategori & Produk",
+      "item": [
+        {
+          "name": "Ambil Semua Kategori",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Kategori tidak kosong\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.length).to.be.at.least(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/categories"
+          }
+        },
+        {
+          "name": "Ambil Katalog Produk",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Katalog memiliki produk dummy\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.length).to.be.at.least(5);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/products"
+          }
+        },
+        {
+          "name": "Pencarian Produk (Chitato)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Hasil pencarian tepat\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json[0].name).to.include(\"Chitato\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/products?query=Chitato"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Pelanggan & Member",
+      "item": [
+        {
+          "name": "Ambil Semua Pelanggan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Data member terdeteksi\", function () {",
+                  "    var json = pm.response.json();",
+                  "    var member = json.find(p => p.isMember === true);",
+                  "    pm.expect(member).to.not.be.undefined;",
+                  "    pm.expect(member.points).to.be.at.least(100);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/customers"
+          }
+        },
+        {
+          "name": "Daftarkan Member Baru",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Member baru memiliki nomor member\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.isMember).to.be.true;",
+                  "    pm.expect(json.memberNumber).to.be.a(\"string\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rina Marlina\",\n  \"contact\": \"081234455667\",\n  \"asMember\": true\n}"
+            },
+            "url": "http://127.0.0.1:8080/api/v1/customers"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Transaksi & Pembayaran Atomik",
+      "item": [
+        {
+          "name": "Hitung Keranjang Belanja Kasir (Draft)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Kalkulasi total dan diskon member valid\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.subtotal).to.be.above(0);",
+                  "    pm.expect(json.total).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-User-Id", "value": "22222222-2222-2222-2222-222222222222" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"plg-001\",\n  \"items\": [\n    {\n      \"productId\": \"brg-001\",\n      \"quantity\": 2\n    }\n  ],\n  \"discountAmount\": 0\n}"
+            },
+            "url": "http://127.0.0.1:8080/api/v1/sales"
+          }
+        },
+        {
+          "name": "Pembayaran Tunai Kasir (Sukses)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Status pembayaran SUCCESS dan kembalian tepat\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.eql(\"SUCCESS\");",
+                  "    pm.expect(json.changeAmount).to.eql(7000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale\": {\n    \"transactionId\": \"TRX-PM-CLI-001\",\n    \"cashierId\": \"22222222-2222-2222-2222-222222222222\",\n    \"customerId\": \"plg-001\",\n    \"items\": [\n      {\n        \"itemId\": \"brg-001\",\n        \"quantity\": 2\n      }\n    ],\n    \"discountAmount\": 0\n  },\n  \"amountPaid\": 30000\n}"
+            },
+            "url": "http://127.0.0.1:8080/api/v1/payments/cash"
+          }
+        },
+        {
+          "name": "Pembayaran Tunai Kurang (Ditolak)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Error message pembayaran kurang\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.error.message).to.include(\"kurang\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sale\": {\n    \"transactionId\": \"TRX-PM-FAIL-001\",\n    \"cashierId\": \"22222222-2222-2222-2222-222222222222\",\n    \"items\": [\n      {\n        \"itemId\": \"brg-001\",\n        \"quantity\": 1\n      }\n    ]\n  },\n  \"amountPaid\": 5000\n}"
+            },
+            "url": "http://127.0.0.1:8080/api/v1/payments/cash"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Laporan & Riwayat",
+      "item": [
+        {
+          "name": "Riwayat Transaksi Terakhir",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Riwayat memiliki transaksi\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.length).to.be.at.least(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/transactions?limit=50"
+          }
+        },
+        {
+          "name": "Laporan Rekap Penjualan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Laporan rekap valid\", function () {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.length).to.be.at.least(1);",
+                  "    pm.expect(json[0].grossSales).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "http://127.0.0.1:8080/api/v1/reports/sales?from=2026-10-01&to=2026-10-31"
+          }
+        }
+      ]
+    }
+  ]
+}
