@@ -186,3 +186,4 @@ function closeAddMemberModal() {
 </script>
 
 <?php require __DIR__ . '/layout/foot.php'; ?>
+

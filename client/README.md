@@ -70,3 +70,4 @@ php -S 127.0.0.1:8000 -t client
 * `F2`: Fokus ke kolom scan barcode / cari barang
 * `F9`: Buka modal pembayaran instan
 * `Esc`: Batalkan modal / reset pencarian
+

@@ -119,3 +119,4 @@ switch ($page) {
         header('Location: ?page=pos');
         exit;
 }
+

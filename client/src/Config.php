@@ -15,3 +15,4 @@ class Config
         return rtrim(self::API_BASE_URL, '/') . '/' . ltrim($path, '/');
     }
 }
+

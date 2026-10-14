@@ -212,6 +212,13 @@ class PosController
         $paymentPayload = [
             'method' => $method,
             'amountPaid' => ($method === 'CASH') ? $amountPaid : $totalTagihan,
+            'items' => array_map(fn($item) => [
+                'productId' => $item['id'],
+                'quantity' => $item['quantity'],
+            ], $cart['items']),
+            'discountAmount' => $cart['discountAmount'] ?? 0,
+            'taxAmount' => $cart['taxAmount'] ?? 0,
+            'customerId' => $cart['customer']['id'] ?? null,
         ];
 
         $payResp = $this->api->post("/sales/{$saleId}/payments", $paymentPayload);
@@ -237,3 +244,4 @@ class PosController
         exit;
     }
 }
+

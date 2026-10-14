@@ -5,7 +5,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProcessPaymentRequest(
     val method: String, // CASH, QRIS, TRANSFER, DEBIT
-    val amountPaid: Long
+    val amountPaid: Long,
+    val items: List<SaleItemRequest> = emptyList(),
+    val discountAmount: Long = 0L,
+    val taxAmount: Long = 0L,
+    val customerId: String? = null
 )
 
 @Serializable

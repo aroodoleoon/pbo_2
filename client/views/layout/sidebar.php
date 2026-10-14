@@ -67,3 +67,4 @@ $userRole = $authUser['role'] ?? 'CASHIER';
         </a>
     </div>
 </aside>
+

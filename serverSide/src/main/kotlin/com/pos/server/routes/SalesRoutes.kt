@@ -37,10 +37,10 @@ fun Route.salesRoutes(salesService: SalesService, paymentService: PaymentService
                 val paymentResponse = paymentService.processPayment(
                     transactionId = transactionId,
                     cashierId = cashierId,
-                    customerId = null,
-                    items = emptyList(),
-                    discountAmount = 0L,
-                    taxAmount = 0L,
+                    customerId = req.customerId,
+                    items = req.items,
+                    discountAmount = req.discountAmount,
+                    taxAmount = req.taxAmount,
                     request = req
                 )
                 call.respond(HttpStatusCode.Created, paymentResponse)

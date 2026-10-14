@@ -78,3 +78,4 @@ class Session
         return self::has('user') && self::has('accessToken');
     }
 }
+

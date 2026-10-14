@@ -158,3 +158,4 @@ class InventoryController
         exit;
     }
 }
+

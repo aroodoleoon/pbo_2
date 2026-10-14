@@ -111,6 +111,32 @@ declare(strict_types=1);
         ::-webkit-scrollbar-track { background: #f2f3ff; }
         ::-webkit-scrollbar-thumb { background: #c7c4d8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #777587; }
+
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #printableReceipt, #printableReceipt * {
+                visibility: visible !important;
+            }
+            #printableReceipt {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 78mm !important;
+                margin: 0 !important;
+                padding: 4mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            @page {
+                size: 80mm auto;
+                margin: 0;
+            }
+        }
     </style>
 </head>
 <body class="bg-surface font-body-md text-on-surface antialiased flex flex-col min-h-screen">
+

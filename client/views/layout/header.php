@@ -65,3 +65,4 @@ $currentFormattedDate = "{$dayName}, " . date('j') . " {$monthName} " . date('Y'
 
     <!-- Main Content Area -->
     <main class="w-full pt-16 flex-1 bg-surface flex flex-col">
+

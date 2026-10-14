@@ -719,21 +719,32 @@ function showReceipt(sale, payment) {
     document.getElementById('rcptTrxNo').innerText = sale.transactionNumber || 'TRX-POS';
     document.getElementById('rcptDate').innerText = new Date().toLocaleString('id-ID');
     document.getElementById('rcptCustomer').innerText = sale.customerId ? 'Member' : 'Umum';
-    document.getElementById('rcptSubtotal').innerText = formatRupiah(payment.subtotal || sale.subtotal);
-    document.getElementById('rcptDiscount').innerText = '-' + formatRupiah(payment.discountAmount || sale.discount || 0);
-    document.getElementById('rcptTax').innerText = '+' + formatRupiah(sale.tax || 0);
-    document.getElementById('rcptTotal').innerText = formatRupiah(payment.total || sale.total);
+    
+    const subtotal = payment.subtotal || sale.subtotal || 0;
+    const discount = payment.discountAmount || sale.discount || 0;
+    const tax = sale.tax || 0;
+    const total = payment.total || sale.total || (subtotal - discount + tax);
+    const amountPaid = payment.amountPaid || total;
+    const change = (payment.changeAmount !== undefined && payment.changeAmount !== null && payment.changeAmount < amountPaid) 
+        ? payment.changeAmount 
+        : Math.max(0, amountPaid - total);
+
+    document.getElementById('rcptSubtotal').innerText = formatRupiah(subtotal);
+    document.getElementById('rcptDiscount').innerText = '-' + formatRupiah(discount);
+    document.getElementById('rcptTax').innerText = '+' + formatRupiah(tax);
+    document.getElementById('rcptTotal').innerText = formatRupiah(total);
     document.getElementById('rcptMethod').innerText = (payment.method || 'CASH') + ':';
-    document.getElementById('rcptAmountPaid').innerText = formatRupiah(payment.amountPaid || payment.total);
-    document.getElementById('rcptChange').innerText = formatRupiah(payment.changeAmount || 0);
+    document.getElementById('rcptAmountPaid').innerText = formatRupiah(amountPaid);
+    document.getElementById('rcptChange').innerText = formatRupiah(change);
 
     const itemsBox = document.getElementById('rcptItemsList');
     let itemsHtml = '';
     (sale.items || []).forEach(it => {
+        const itemSubtotal = it.subtotal || (it.unitPrice * it.quantity);
         itemsHtml += `
-            <div class="flex justify-between">
+            <div class="flex justify-between" style="display:flex;justify-content:space-between;margin-bottom:2px;">
                 <span>${it.productName || 'Barang'} x${it.quantity}</span>
-                <span>${formatRupiah(it.subtotal || (it.unitPrice * it.quantity))}</span>
+                <span>${formatRupiah(itemSubtotal)}</span>
             </div>
         `;
     });
@@ -749,8 +760,86 @@ function closeReceiptModal() {
     location.reload();
 }
 
+/**
+ * Mencetak BENAR-BENAR HANYA lembar struk fisik (Thermal Receipt 80mm/58mm),
+ * tanpa elemen antarmuka web, sidebar, header, ataupun tombol modal.
+ */
 function printReceipt() {
-    window.print();
+    const receiptBox = document.getElementById('printableReceipt');
+    if (!receiptBox) return;
+
+    let iframe = document.getElementById('thermalReceiptFrame');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'thermalReceiptFrame';
+        iframe.style.position = 'fixed';
+        iframe.style.top = '-9999px';
+        iframe.style.left = '-9999px';
+        iframe.style.width = '0px';
+        iframe.style.height = '0px';
+        iframe.style.border = 'none';
+        document.body.appendChild(iframe);
+    }
+
+    const frameDoc = iframe.contentWindow.document;
+    frameDoc.open();
+    frameDoc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8"/>
+            <title>Cetak Struk Belanja</title>
+            <style>
+                @page {
+                    size: 80mm auto;
+                    margin: 0;
+                }
+                * {
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 0;
+                }
+                body {
+                    width: 78mm;
+                    margin: 0 auto;
+                    padding: 6mm 4mm;
+                    font-family: 'Courier New', Courier, monospace, monospace;
+                    font-size: 11px;
+                    line-height: 1.35;
+                    color: #000000;
+                    background: #ffffff;
+                    -webkit-print-color-adjust: exact;
+                }
+                .text-center { text-align: center; }
+                .font-bold { font-weight: bold; }
+                .flex { display: flex; }
+                .justify-between { display: flex; justify-content: space-between; align-items: baseline; }
+                .flex-col { display: flex; flex-direction: column; }
+                .items-center { align-items: center; }
+                .border-dashed { border-style: dashed; }
+                .border-b { border-bottom: 1px dashed #444; }
+                .border-t { border-top: 1px solid #000; }
+                .my-1 { margin-top: 4px; margin-bottom: 4px; }
+                .my-2 { margin-top: 6px; margin-bottom: 6px; }
+                .pt-1 { padding-top: 4px; }
+                .text-sm { font-size: 13px; }
+                .text-xs { font-size: 10px; }
+                .text-gray-600, .text-gray-500 { color: #333; }
+                .tracking-wider { letter-spacing: 0.05em; }
+            </style>
+        </head>
+        <body>
+            ${receiptBox.innerHTML}
+        </body>
+        </html>
+    `);
+    frameDoc.close();
+
+    // Berikan sedikit jeda rendering DOM sebelum memanggil dialog print native
+    setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    }, 250);
 }
 
 // Keyboard shortcuts
@@ -769,3 +858,4 @@ window.addEventListener('keydown', function(e) {
 </script>
 
 <?php require __DIR__ . '/layout/foot.php'; ?>
+

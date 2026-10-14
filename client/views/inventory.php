@@ -419,3 +419,4 @@ function closeAddProductModal() {
 </script>
 
 <?php require __DIR__ . '/layout/foot.php'; ?>
+
