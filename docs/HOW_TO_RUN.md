@@ -82,3 +82,4 @@ python -m unittest discover tests
 # 3. Postman CLI Automated Test
 postman collection run docs/pos_system_postman_collection.json
 ```
+
