@@ -91,18 +91,31 @@ Pengembangan modul utama untuk MVP POS client-server selama 7 hari.
 
 ```text
 pbo_2/
-├── Modul 2/
-├── Modul 3/
-├── Modul 5/
 ├── client/
 ├── database/
 ├── docs/
 ├── serverSide/
 ├── .env.example
 ├── .gitignore
+├── Analisis_dan_Pembagian_Tim_Proyek_POS_OO...
 ├── README.md
 └── compose.yaml
 ```
+
+### Keterangan Folder dan File
+
+| Folder/File | Fungsi |
+|---|---|
+| `client/` | Komponen aplikasi client atau antarmuka pengguna |
+| `database/` | File dan konfigurasi terkait database |
+| `docs/` | Dokumentasi teknis proyek |
+| `serverSide/` | Komponen backend atau sisi server |
+| `.env.example` | Contoh konfigurasi variabel lingkungan |
+| `.gitignore` | Menentukan file yang diabaikan oleh Git |
+| `Analisis_dan_Pembagian_Tim_Proyek_POS_OO...` | Dokumen analisis kebutuhan dan pembagian tugas tim |
+| `README.md` | Dokumentasi utama proyek, termasuk progres pengembangan |
+| `compose.yaml` | Konfigurasi layanan untuk Docker Compose |
+
 
 Struktur repository mengikuti pengembangan sistem POS berbasis Kotlin dengan pendekatan monorepo. Folder modul digunakan untuk mengorganisasi pengerjaan berdasarkan pembagian tugas, sedangkan folder client, server, database, dan docs mendukung pengembangan serta integrasi sistem.
 
