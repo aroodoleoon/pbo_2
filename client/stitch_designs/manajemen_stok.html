@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container":"#eaedff","inverse-on-surface":"#eef0ff","on-secondary":"#ffffff","on-background":"#131b2e","inverse-primary":"#c3c0ff","on-primary-fixed-variant":"#3323cc","on-tertiary-container":"#ffd4a4","on-surface":"#131b2e","surface-container-highest":"#dae2fd","primary-container":"#4f46e5","error":"#ba1a1a","on-primary-fixed":"#0f0069","surface":"#faf8ff","surface-container-high":"#e2e7ff","tertiary-container":"#885500","outline":"#777587","secondary-container":"#6cf8bb","on-tertiary-fixed":"#2a1700","secondary-fixed":"#6ffbbe","on-primary":"#ffffff","on-error-container":"#93000a","on-secondary-container":"#00714d","surface-container-lowest":"#ffffff","tertiary-fixed-dim":"#ffb95f","surface-dim":"#d2d9f4","secondary":"#006c49","on-secondary-fixed-variant":"#005236","surface-bright":"#faf8ff","on-tertiary-fixed-variant":"#653e00","outline-variant":"#c7c4d8","secondary-fixed-dim":"#4edea3","on-secondary-fixed":"#002113","on-error":"#ffffff","tertiary":"#684000","on-tertiary":"#ffffff","error-container":"#ffdad6","background":"#faf8ff","inverse-surface":"#283044","primary-fixed-dim":"#c3c0ff","on-primary-container":"#dad7ff","primary-fixed":"#e2dfff","surface-container-low":"#f2f3ff","surface-variant":"#dae2fd","on-surface-variant":"#464555","surface-tint":"#4d44e3","primary":"#3525cd","tertiary-fixed":"#ffddb8"},borderRadius:{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},spacing:{"gutter-lg":"1.5rem","space-xs":"0.25rem","space-lg":"1rem","space-md":"0.75rem","space-sm":"0.5rem","gutter":"1rem","margin":"1rem","space-xl":"1.5rem","margin-lg":"1.5rem"},fontFamily:{"body-md":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"numeric-total":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"numeric-md":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"]},fontSize:{"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-xl":["32px",{"lineHeight":"40px","letterSpacing":"-0.02em","fontWeight":"700"}],"numeric-total":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-lg":["16px",{"lineHeight":"24px","fontWeight":"500"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"600"}],"numeric-md":["18px",{"lineHeight":"24px","fontWeight":"700"}],"headline-md":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-lg":["24px",{"lineHeight":"32px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.05em","fontWeight":"700"}],"headline-lg-mobile":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"body-sm":["12px",{"lineHeight":"16px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-64 bg-inverse-surface border-r border-outline-variant/20 z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-gutter flex items-center gap-space-sm border-b border-outline-variant/10"><img alt="POS Academic Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VzzIxnqi2MR_GSDEkhCK-Q-q4CLaTwXvbSsxgv27sUcuP3th1f8pt1ReBic8QWgSALgyQGk6X3vdrO3WLNd8KOCpLG1RbY3B90RFobze3NecT4y5VpGl1_SSJ7Evblo58vQ1tNbnXo0jlq8p0EQjVCCEeduUvyTtXYuwrMuz32mWO_A9eeMM-SjwQdTkGEIh1eCpjhVd4sCJdm4gs4MCz6So2pZksY4HcZ7TXFUeuDwB1r8-LQ8DAZpw"/><div class="flex flex-col"><span class="font-headline-md text-headline-md text-inverse-on-surface leading-tight">POS Academic</span><span class="font-label-sm text-label-sm text-outline-variant uppercase tracking-wider">Retail Terminal</span></div></div><nav class="flex flex-col gap-space-xs px-space-sm pt-space-lg" data-active-classes="bg-primary-container text-on-primary font-bold shadow-sm"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-inverse-on-surface transition-colors font-body-md text-body-md" data-path="pos-kasir" href="#"><span class="material-symbols-outlined text-[20px]">point_of_sale</span><span>POS Kasir</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg transition-colors bg-primary-container text-on-primary font-bold shadow-sm" data-path="katalog-barang" href="#"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span>Katalog Barang</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-inverse-on-surface transition-colors font-body-md text-body-md" data-path="riwayat-dan-laporan" href="#"><span class="material-symbols-outlined text-[20px]">receipt_long</span><span>Riwayat &amp; Laporan</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-high/10 hover:text-inverse-on-surface transition-colors font-body-md text-body-md" data-path="data-pelanggan" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span>Data Pelanggan</span></a></nav></div><div class="p-space-md border-t border-outline-variant/10 flex flex-col gap-space-md bg-inverse-surface/80"><div class="flex items-center gap-space-md p-space-sm rounded-lg bg-surface-container-low/5"><div class="relative flex-shrink-0"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6Y2_6cmDUwyxzTDsekjiv8kPkVqPbYsxA5sHVWaLArJHxm3rxU-Wot0yllgK3zI94Wbbb4oHIAZc1V_B_YGdfeIjiYfYr1tUDISqwcbYC6atXT7YuNLl90dijUKfTGTokRadACwWFXtFKzoRpyLsaL9hKfxRVOv390l7YJ4_jO1pT95oLCSKKWhHnKVtIR6cOo6iLSZ50Fs26-shY5ReheAfvap8--u60qnz5MRHXzOQoOf-YG8zl"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-secondary-fixed rounded-full ring-2 ring-inverse-surface"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-body-md text-body-md font-semibold text-inverse-on-surface truncate">Dapin (Kasir)</span><span class="font-label-sm text-label-sm text-outline-variant truncate">Shift 1 • Terminal A</span></div></div><a class="flex items-center justify-center gap-space-sm w-full py-space-sm px-space-md rounded-lg text-error hover:bg-error-container/20 transition-colors font-body-md text-body-md" data-path="login" href="#"><span class="material-symbols-outlined text-[18px]">logout</span><span>Logout</span></a></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/20 z-40 px-gutter-lg flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>Sistem Aktif &amp; Terhubung</span></div></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-xs rounded-full border border-outline-variant/30 text-on-surface font-label-md text-label-md"><span class="material-symbols-outlined text-[18px] text-primary">calendar_today</span><span>Kamis, 24 Okt 2024</span></div><div class="flex items-center gap-space-sm"><button class="p-space-xs text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span></button><button class="p-space-xs text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-[20px]">settings</span></button></div></div></header><main class="w-full pt-16 flex-1 bg-surface"><div class="flex flex-col w-full">
+<div class="px-gutter-lg py-space-xl flex flex-col gap-space-xl">
+<!-- Top Header & Action Bar -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm mb-space-xs">
+<span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary-container text-on-primary text-body-sm font-bold">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">Gudang &amp; Logistik</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface">Katalog &amp; Manajemen Stok Barang</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Kelola harga jual, stok fisik, dan peringatan restok otomatis.</p>
+</div>
+<div class="flex items-center gap-space-md flex-wrap">
+<button class="inline-flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md font-semibold hover:bg-surface-container transition-all shadow-sm" type="button">
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">file_download</span>
+<span>Export Excel</span>
+</button>
+<button class="inline-flex items-center gap-space-sm px-space-lg py-space-sm rounded-lg bg-primary-container text-on-primary font-body-md text-body-md font-semibold hover:bg-primary transition-all shadow-md hover:shadow-lg" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+<span>Tambah Barang Baru</span>
+</button>
+</div>
+</div>
+<!-- KPI Metric Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-lg">
+<!-- Metric 1: Total SKU -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-primary/5 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Produk Terdaftar</span>
+<span class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">category</span>
+</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-numeric-total text-numeric-total text-on-surface">148</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">SKU</span>
+</div>
+<div class="flex items-center gap-space-xs text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+<span>+6 SKU baru bulan ini</span>
+</div>
+</div>
+</div>
+<!-- Metric 2: Total Fisik Gudang -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-secondary/5 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Total Stok Fisik Gudang</span>
+<span class="w-10 h-10 rounded-xl bg-secondary-container/40 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">warehouse</span>
+</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-numeric-total text-numeric-total text-on-surface">3.420</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">Pcs</span>
+</div>
+<div class="flex items-center gap-space-xs text-secondary font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[16px]">monetization_on</span>
+<span>Nilai Aset: Rp 48.250.000</span>
+</div>
+</div>
+</div>
+<!-- Metric 3: Stok Menipis (Alert) -->
+<div class="relative overflow-hidden rounded-xl bg-error-container p-space-lg shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-error/10 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-md text-label-md text-on-error-container uppercase tracking-wider font-bold">Barang Stok Menipis</span>
+<span class="w-10 h-10 rounded-xl bg-error text-on-error flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[22px]">warning</span>
+</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-numeric-total text-numeric-total text-on-error-container">3</span>
+<span class="font-body-md text-body-md text-on-error-container font-semibold">Produk</span>
+</div>
+<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded-full bg-error text-on-error w-fit font-label-sm text-label-sm uppercase tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-surface-container-lowest animate-pulse"></span>
+<span>Segera Restok!</span>
+</div>
+</div>
+</div>
+<!-- Metric 4: Out of Stock (OOS) -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm flex flex-col justify-between">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-secondary/5 pointer-events-none"></div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Barang Habis / OOS</span>
+<span class="w-10 h-10 rounded-xl bg-secondary-container/40 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[22px]">check_circle</span>
+</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-numeric-total text-numeric-total text-on-surface">0</span>
+<span class="font-body-md text-body-md text-on-surface-variant font-medium">Produk</span>
+</div>
+<div class="flex items-center gap-space-xs text-secondary font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span>Seluruh SKU Terpenuhi</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter & Search Controls Bar -->
+<div class="rounded-xl bg-surface-container-lowest p-space-md shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
+<!-- Search Input -->
+<div class="flex-1 relative flex items-center">
+<span class="material-symbols-outlined absolute left-space-md text-outline pointer-events-none text-[20px]">search</span>
+<input class="w-full bg-surface-container-low pl-10 pr-space-md py-space-sm rounded-lg text-on-surface placeholder:text-outline font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="Cari berdasarkan nama barang, kode barcode (EAN-13), atau kategori..." type="text"/>
+</div>
+<!-- Filter Controls -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<div class="relative">
+<select class="appearance-none bg-surface-container-low px-space-md py-space-sm pr-9 rounded-lg font-body-md text-body-md text-on-surface font-medium focus:ring-2 focus:ring-primary outline-none cursor-pointer">
+<option value="">Semua Kategori</option>
+<option value="makanan">Makanan Ringan</option>
+<option value="minuman">Minuman</option>
+<option value="pokok">Kebutuhan Pokok</option>
+<option value="perawatan">Perawatan Diri</option>
+</select>
+<span class="material-symbols-outlined absolute right-space-sm top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">expand_more</span>
+</div>
+<button class="p-space-sm bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface rounded-lg transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse min-w-[1080px]">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+<th class="py-space-md px-space-lg font-bold">Kode Barcode</th>
+<th class="py-space-md px-space-md font-bold">Nama Produk &amp; SKU</th>
+<th class="py-space-md px-space-md font-bold">Kategori</th>
+<th class="py-space-md px-space-md font-bold text-right">Harga Beli</th>
+<th class="py-space-md px-space-md font-bold text-right">Harga Jual</th>
+<th class="py-space-md px-space-md font-bold text-center">Margin</th>
+<th class="py-space-md px-space-md font-bold text-center">Stok</th>
+<th class="py-space-md px-space-md font-bold text-center">Min. Stok</th>
+<th class="py-space-md px-space-md font-bold text-center">Status</th>
+<th class="py-space-md px-space-lg font-bold text-right">Aksi</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-md text-body-md">
+<!-- Row 1: Chitato -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-on-surface-variant font-mono">
+                899274512001
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A clean studio photo of Chitato potato chips bag snack with packaging details against a soft daylight background in commercial retail lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_MJJ701106Jz50dk0Hz9UpYZDFjbcLkQsdMVaTiPhAHKwJKbJh4wGxSBn4JHCnIjROn7ITCXvPXkXYVPB1eBOKlw8DqXodLYu89IqasUdZh3VkscQFwPwEM99ocgG6FyVFIKkHe1h1vLGZ5M5zBYniRQnLM6Dk4RtqpLAL-0SYqAbSCtIeSjt-PIZWcKitvHcrc9AxJ0Z8Czv0ujt8vhdXrNsmLJ2c2eYO5mtS4-QrIrHXD05oDgl"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-semibold text-on-surface truncate">Chitato Sapi Panggang 68g</span>
+<span class="font-label-sm text-label-sm text-outline">SKU-CHT-001</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Makanan Ringan</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 9.200</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 11.500</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">25%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold">50 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">15 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-secondary font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Aman
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md font-medium transition-colors" type="button">Stok Masuk</button>
+<button class="px-space-sm py-1 rounded bg-error-container/30 hover:bg-error-container text-error font-label-md text-label-md font-medium transition-colors" type="button">Barang Rusak</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Indomie Goreng -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-on-surface-variant font-mono">
+                899886620014
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Indomie instant noodles package in high resolution retail studio photography with crisp lighting and vibrant Indonesian packaging graphics" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_vHX0G5NhhgtUkKWCgBEq0Z_qFNfOeDxSyf0mTihQs_wF54lD846mLO2mPrZFmuAJ4-xLoXzBDDzamn7HOkJvV8oC9KdRoEi8Z2r7uZH_-YFzYhmb9x2iVZrU7T2xHMz2opx3VOUV8it0DqWO2hYM2cocB4DJGpb0VdumJwcz3lNuORbet-iyML3HPRs00YWRHqyYznN0DpJioO2zyyFFVamzbq-WEseLOi0Naag_Zp-cn18SkPuo"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-semibold text-on-surface truncate">Indomie Goreng Spesial 85g</span>
+<span class="font-label-sm text-label-sm text-outline">SKU-IND-014</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Kebutuhan Pokok</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 2.850</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 3.500</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">22.8%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold">120 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">30 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-secondary font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Aman
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md font-medium transition-colors" type="button">Stok Masuk</button>
+<button class="px-space-sm py-1 rounded bg-error-container/30 hover:bg-error-container text-error font-label-md text-label-md font-medium transition-colors" type="button">Barang Rusak</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Silverqueen (Stock Alert) -->
+<tr class="bg-error-container/10 hover:bg-error-container/20 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-error font-mono font-semibold">
+                899100123058
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Silverqueen milk chocolate bar with almond nuts packaging on professional store inventory backdrop with clean commercial styling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjiowl5JN_iegzP8AqEIFGg6IakD2xZD4xmJGq9qB3gh1aNMig4ocxcpkwbgUOyhHdxv56ay6MCIPcN7ydiJLRHgnpQ60F0hijSAUmR_Qcl2rjFjRioicDvcYhsCHqCZa8Il2Fv6UEgTWdnrPKEW2RTwm4YdhVr5MDvckTp7KpU4pRlQkzUBTzJllp0Yw3OnvwwcClJmZXDietnU-WVc2o9D1djwjfF6erWXsMOBzWpVBoh8X245im"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-bold text-on-surface truncate">Silverqueen Almond 58g</span>
+<span class="font-label-sm text-label-sm text-error font-medium">SKU-SQ-058</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Makanan Ringan</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 13.000</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 16.500</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">26.9%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold text-error">4 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">10 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error text-on-error font-label-sm text-label-sm font-bold shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  Sisa 4 - Segera Restok!
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-error text-on-error font-label-md text-label-md font-bold shadow-sm hover:opacity-95 transition-all" type="button">Restok Cepat</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Ultra Milk -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-on-surface-variant font-mono">
+                899100110250
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Ultra Milk chocolate flavor tetra pak box beverage on retail merchandise display with bright commercial product lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBukPsTdUd9vjvGv0isK5tjDb7SS4H-BqgneUzYt1GqJWbTTIPKLCdIkVVNwmDPPDvIC44Xm2sKX9ve9IbVgZgTEYtxhJ3IcTtquUPOtl3O2IWk70PRKFDhvDoVsOHTE6KLBZ3VEZPX0tLFK4RbRnGCTeEZ_ySxF7wKGVwRrWZDMEJro_hulK6ibkUystixTWW5piRxxmG62R1CSsMFIPKX9iGgtmk4hPy6MjqE533hUv_JKM9YxlE2"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-semibold text-on-surface truncate">Ultra Milk Cokelat 250ml</span>
+<span class="font-label-sm text-label-sm text-outline">SKU-UM-250</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Minuman</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 5.600</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 7.000</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">25%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold">35 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">12 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-secondary font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Aman
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md font-medium transition-colors" type="button">Stok Masuk</button>
+<button class="px-space-sm py-1 rounded bg-error-container/30 hover:bg-error-container text-error font-label-md text-label-md font-medium transition-colors" type="button">Barang Rusak</button>
+</div>
+</td>
+</tr>
+<!-- Row 5: Bimoli (Stock Alert) -->
+<tr class="bg-error-container/10 hover:bg-error-container/20 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-error font-mono font-semibold">
+                899298410012
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Bimoli 1 liter cooking oil bottle standing upright in bright studio retail product illumination" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlQBh5gLD4x90SGXCoWThpYxg5jiaesiNqT6Ca24Rh91FQyzIiPGqq0wcgoZsRNpSmZVKJsKekWiBb_ajRvwAPcARvWKttnV8U9xKZ4OISUcWcKQAfeYvBKVn0nN6Y74ERdbZv_sil3PI8vIM3BKeKSFIr_DSJQVZsYst5eJx_pXxhnIGKgzzD35kMzmjMeUHlbXjZgOtDlq2Gda3SidVdifWft79fK4uLQiMgiU8S2e21OL_pXTz9"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-bold text-on-surface truncate">Minyak Goreng Bimoli 1L</span>
+<span class="font-label-sm text-label-sm text-error font-medium">SKU-BIM-001</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Kebutuhan Pokok</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 18.000</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 21.000</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">16.6%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold text-error">3 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">10 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-error text-on-error font-label-sm text-label-sm font-bold shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+                  Sisa 3 - Segera Restok!
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-error text-on-error font-label-md text-label-md font-bold shadow-sm hover:opacity-95 transition-all" type="button">Restok Cepat</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+</div>
+</td>
+</tr>
+<!-- Row 6: Pepsodent -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-on-surface-variant font-mono">
+                899999912045
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Pepsodent fresh cool toothpaste box product packaging on white clean background with retail lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiIQQ2uMrBzW59t4hEum_DBDnrTkGyoZZbqbx_BXYgyFFuu9YmEl2LbIg6lwA5sgJ781mymRa3ctToH11l8pBuufzlcNoHGAtormdjtfKOR91nz6nF1pLgBb3rpI1l8FYdwCGiRdJFly5YHeIbYgrFB4y9Yc7xnYnjnAizpeXeBR3Cb8lTt0_ksjucyhGz6nt1_xsHRyH8kMjjmlETUU6T8PMQTsZTOnyDq0WDPT6SNhw5nJUKkPeY"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-semibold text-on-surface truncate">Pepsodent Fresh Cool 120g</span>
+<span class="font-label-sm text-label-sm text-outline">SKU-PEP-120</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Perawatan Diri</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 11.800</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 14.500</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">22.8%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold">18 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">8 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-secondary font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Aman
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md font-medium transition-colors" type="button">Stok Masuk</button>
+<button class="px-space-sm py-1 rounded bg-error-container/30 hover:bg-error-container text-error font-label-md text-label-md font-medium transition-colors" type="button">Barang Rusak</button>
+</div>
+</td>
+</tr>
+<!-- Row 7: Aqua Mineral -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-lg font-label-md text-label-md text-on-surface-variant font-mono">
+                899277201060
+              </td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Aqua plastic mineral water bottle 600ml with fresh clean water reflections in product photography studio setup" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk2vgpaOXTc5vsyzupF8x2sDRnqUmlJU87P5sCnT1UbUQ9IpqN9mNKLNch1M-rVal4ryBmtJrPCUfBZH6G5T8voZfpkIO19JFku-JCaIvhNsLqDwv4XedbkCJttITZdQf3bgWNCyVkEi-scFSXgZNb_xrY_TPxaAkCKZbMGdykkvd8D2JSJSReLO_MlNqdsCpZCID5eANZNJip4ImTbKU-hoDNft4AezZY4YGU7XEXuQICJ7ecsycP"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-md text-body-lg font-semibold text-on-surface truncate">Aqua Air Mineral 600ml</span>
+<span class="font-label-sm text-label-sm text-outline">SKU-AQU-600</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md">
+<span class="inline-flex px-space-sm py-0.5 rounded bg-surface-container-low font-label-md text-label-md text-on-surface-variant font-medium">Minuman</span>
+</td>
+<td class="py-space-md px-space-md text-right font-medium text-on-surface-variant">Rp 3.100</td>
+<td class="py-space-md px-space-md text-right font-bold text-on-surface">Rp 4.000</td>
+<td class="py-space-md px-space-md text-center">
+<span class="font-semibold text-secondary">29%</span>
+</td>
+<td class="py-space-md px-space-md text-center font-bold">80 pcs</td>
+<td class="py-space-md px-space-md text-center text-outline">20 pcs</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container/40 text-secondary font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Aman
+                </span>
+</td>
+<td class="py-space-md px-space-lg text-right">
+<div class="inline-flex items-center justify-end gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-medium transition-colors" type="button">Ubah Harga</button>
+<button class="px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md font-medium transition-colors" type="button">Stok Masuk</button>
+<button class="px-space-sm py-1 rounded bg-error-container/30 hover:bg-error-container text-error font-label-md text-label-md font-medium transition-colors" type="button">Barang Rusak</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Footer -->
+<div class="px-space-lg py-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<span class="font-body-md text-body-md text-on-surface-variant">
+          Menampilkan <strong class="text-on-surface font-semibold">1 - 7</strong> dari <strong class="text-on-surface font-semibold">148</strong> Produk
+        </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all font-body-md text-body-md font-medium disabled:opacity-50" type="button">
+            &lt; Prev
+          </button>
+<button class="w-9 h-9 rounded-lg bg-primary-container text-on-primary font-body-md text-body-md font-bold flex items-center justify-center shadow-sm" type="button">
+            1
+          </button>
+<button class="w-9 h-9 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all font-body-md text-body-md font-semibold flex items-center justify-center" type="button">
+            2
+          </button>
+<button class="w-9 h-9 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all font-body-md text-body-md font-semibold flex items-center justify-center" type="button">
+            3
+          </button>
+<span class="px-space-xs text-outline font-bold">...</span>
+<button class="w-9 h-9 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-all font-body-md text-body-md font-semibold flex items-center justify-center" type="button">
+            15
+          </button>
+<button class="px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md font-medium hover:bg-surface-container transition-all" type="button">
+            Next &gt;
+          </button>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
