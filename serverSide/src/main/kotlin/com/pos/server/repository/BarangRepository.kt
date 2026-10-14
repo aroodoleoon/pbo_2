@@ -96,7 +96,11 @@ class BarangRepository(private val dataSource: DataSource) {
                 s.setString(1, barang.id)
                 s.setString(2, barang.kode)
                 s.setString(3, barang.nama)
-                s.setString(4, barang.kategoriId)
+                if (barang.kategoriId != null) {
+                    s.setString(4, barang.kategoriId)
+                } else {
+                    s.setNull(4, java.sql.Types.VARCHAR)
+                }
                 s.setLong(5, barang.hargaBeli)
                 s.setLong(6, barang.hargaJual)
                 s.setInt(7, barang.stok)
@@ -117,7 +121,11 @@ class BarangRepository(private val dataSource: DataSource) {
             c.prepareStatement(sql).use { s ->
                 s.setString(1, barang.kode)
                 s.setString(2, barang.nama)
-                s.setString(3, barang.kategoriId)
+                if (barang.kategoriId != null) {
+                    s.setString(3, barang.kategoriId)
+                } else {
+                    s.setNull(3, java.sql.Types.VARCHAR)
+                }
                 s.setLong(4, barang.hargaBeli)
                 s.setLong(5, barang.hargaJual)
                 s.setInt(6, barang.stok)

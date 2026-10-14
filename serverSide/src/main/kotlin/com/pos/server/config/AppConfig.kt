@@ -17,7 +17,10 @@ data class AppConfig(
             val user = System.getenv("POSTGRES_USER") ?: "pos_app"
             val pass = System.getenv("POSTGRES_PASSWORD") ?: "pos_password"
 
-            val url = System.getenv("JDBC_DATABASE_URL") ?: "jdbc:postgresql://$host:$port/$dbName"
+            val rawUrl = System.getenv("JDBC_DATABASE_URL") ?: "jdbc:postgresql://$host:$port/$dbName"
+            val url = if (rawUrl.startsWith("jdbc:postgresql") && !rawUrl.contains("stringtype=")) {
+                if (rawUrl.contains("?")) "$rawUrl&stringtype=unspecified" else "$rawUrl?stringtype=unspecified"
+            } else rawUrl
 
             return AppConfig(
                 dbConfig = DatabaseConfig(
