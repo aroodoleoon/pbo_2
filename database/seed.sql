@@ -1,0 +1,35 @@
+-- Data awal (Seed) untuk Pengujian & Demo Akademik POS
+-- Password admin123: 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
+-- Password kasir123: 826450cd5c3b9ddf6c584cb020d912ae8b472becc486dd6e9dcaec1a89d71457
+
+-- 1. Karyawan (Admin & Kasir)
+INSERT INTO karyawan (id, nama, username, password_hash, role, aktif) VALUES
+('11111111-1111-1111-1111-111111111111', 'Wildan Administrator', 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN', true),
+('22222222-2222-2222-2222-222222222222', 'Dapin Kasir', 'kasir1', '826450cd5c3b9ddf6c584cb020d912ae8b472becc486dd6e9dcaec1a89d71457', 'CASHIER', true)
+ON CONFLICT (username) DO NOTHING;
+
+-- 2. Kategori Barang
+INSERT INTO kategori_barang (id, nama) VALUES
+('33333333-3333-3333-3333-333333333331', 'Makanan Ringan'),
+('33333333-3333-3333-3333-333333333332', 'Minuman'),
+('33333333-3333-3333-3333-333333333333', 'Kebutuhan Pokok')
+ON CONFLICT (nama) DO NOTHING;
+
+-- 3. Barang
+INSERT INTO barang (id, kode, nama, kategori_id, harga_beli, harga_jual, stok, stok_minimum, aktif) VALUES
+('44444444-4444-4444-4444-444444444441', '89999991001', 'Chitato Sapi Panggang 68g', '33333333-3333-3333-3333-333333333331', 8000, 11500, 50, 10, true),
+('44444444-4444-4444-4444-444444444442', '89999991002', 'Ultra Milk Cokelat 250ml', '33333333-3333-3333-3333-333333333332', 5000, 7000, 40, 5, true),
+('44444444-4444-4444-4444-444444444443', '89999991003', 'Aqua Botol 600ml', '33333333-3333-3333-3333-333333333332', 2500, 4000, 100, 20, true),
+('44444444-4444-4444-4444-444444444444', '89999991004', 'Minyak Goreng Sania 2L', '33333333-3333-3333-3333-333333333333', 28000, 34000, 25, 5, true)
+ON CONFLICT (kode) DO NOTHING;
+
+-- 4. Pelanggan & Member
+INSERT INTO pelanggan (id, nama, kontak) VALUES
+('55555555-5555-5555-5555-555555555551', 'Andi Santoso', '081234567890'),
+('55555555-5555-5555-5555-555555555552', 'Budi Pratama', '081987654321')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO member (id, pelanggan_id, nomor_member, poin) VALUES
+('66666666-6666-6666-6666-666666666661', '55555555-5555-5555-5555-555555555551', 'MBR-001', 150)
+ON CONFLICT DO NOTHING;
+
