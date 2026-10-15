@@ -373,14 +373,47 @@ $('pdx').onclick = () => {
 };
 
 $('q').addEventListener('input', draw);
-$('q').addEventListener('keydown', e => {
+$('q').addEventListener('keydown', async e => {
     if (e.key === 'Enter') {
         const val = $('q').value.trim();
+        if (!val) return;
+        
         const match = P.find(p => p.sku === val);
-        if (match && match.stock > 0) {
-            add(match.id);
-            $('q').value = '';
-            draw();
+        if (match) {
+            if (match.stock > 0) {
+                add(match.id);
+                $('q').value = '';
+                draw();
+            } else {
+                alert('Stok fisik produk ' + match.name + ' habis.');
+            }
+            return;
+        }
+
+        // Lookup online ke backend endpoint barcode
+        try {
+            const res = await fetch('?page=api-barcode-scan&barcode=' + encodeURIComponent(val));
+            const json = await res.json();
+            if (json.success && json.product) {
+                const prod = json.product;
+                P.push({
+                    id: prod.id,
+                    sku: prod.barcode,
+                    name: prod.name,
+                    buy: prod.buyPrice,
+                    sell: prod.sellPrice,
+                    stock: prod.stock,
+                    min: prod.minStock,
+                    cat: prod.categoryId
+                });
+                add(prod.id);
+                $('q').value = '';
+                draw();
+            } else {
+                alert(json.message || 'Barang dengan barcode "' + val + '" tidak ditemukan.');
+            }
+        } catch (err) {
+            console.error('Gagal scan barcode:', err);
         }
     }
 });

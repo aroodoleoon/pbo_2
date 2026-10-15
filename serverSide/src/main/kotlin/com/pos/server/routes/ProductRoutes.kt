@@ -78,6 +78,34 @@ fun Route.productRoutes(productService: ProductService) {
             }
         }
 
+        get("/barcode/{barcode}") {
+            val barcode = call.parameters["barcode"]?.trim()
+            if (barcode.isNullOrBlank()) {
+                return@get call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", "Barcode tidak boleh kosong."))
+            }
+            val p = productService.getProductByBarcode(barcode)
+            if (p == null) {
+                return@get call.respond(
+                    HttpStatusCode.NotFound,
+                    ApiErrorResponse("NOT_FOUND", "Barang dengan barcode '$barcode' tidak ditemukan.")
+                )
+            }
+            call.respond(
+                HttpStatusCode.OK,
+                ProductDto(
+                    id = p.id,
+                    barcode = p.kode,
+                    name = p.nama,
+                    categoryId = p.kategoriId,
+                    buyPrice = p.hargaBeli,
+                    sellPrice = p.hargaJual,
+                    stock = p.stok,
+                    minStock = p.stokMinimum,
+                    active = p.aktif
+                )
+            )
+        }
+
         get("/{id}") {
             try {
                 val id = call.parameters["id"] ?: throw IllegalArgumentException("ID barang diperlukan.")

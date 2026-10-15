@@ -160,6 +160,34 @@ class PosController
         exit;
     }
 
+    public function apiBarcodeScan(): void
+    {
+        header('Content-Type: application/json');
+        $barcode = trim((string)($_GET['barcode'] ?? ($_POST['barcode'] ?? '')));
+
+        if ($barcode === '') {
+            echo json_encode(['success' => false, 'message' => 'Barcode tidak boleh kosong']);
+            exit;
+        }
+
+        $resp = $this->api->get('/products/barcode/' . urlencode($barcode));
+        if ($resp->isSuccess() && !empty($resp->getData())) {
+            $product = new Product($resp->getData());
+            Cart::addItem($product, 1);
+            echo json_encode([
+                'success' => true,
+                'product' => $product->toArray(),
+                'cart' => Cart::calculateSummary()
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => $resp->getErrorMessage() ?? "Barang dengan barcode '{$barcode}' tidak ditemukan."
+            ]);
+        }
+        exit;
+    }
+
     public function apiCheckout(): void
     {
         header('Content-Type: application/json');
@@ -194,76 +222,52 @@ class PosController
             exit;
         }
 
-        // 1. Buat keranjang transaksi di backend
-        $salePayload = [
+        // Unified Atomic Checkout ke Ktor backend
+        $checkoutPayload = [
+            'idempotencyKey' => 'chk-' . bin2hex(random_bytes(8)),
             'customerId' => $customerId,
             'items' => $items,
-            'discountAmount' => (int)($input['discountAmount'] ?? ($cart['discountAmount'] ?? 0)),
+            'payment' => [
+                'method' => $method,
+                'amountPaid' => $amountPaid,
+            ]
         ];
 
-        $saleResp = $this->api->post('/sales', $salePayload);
-        if (!$saleResp->isSuccess()) {
+        $checkoutResp = $this->api->post('/sales/checkout', $checkoutPayload);
+        if (!$checkoutResp->isSuccess()) {
             echo json_encode([
                 'success' => false,
                 'ok' => false,
-                'message' => 'Gagal membuat penjualan: ' . ($saleResp->getErrorMessage() ?? 'Stok tidak mencukupi'),
-                'msg' => $saleResp->getErrorMessage() ?? 'Stok tidak mencukupi'
+                'message' => $checkoutResp->getErrorMessage() ?? 'Gagal memproses checkout transaksi',
+                'msg' => $checkoutResp->getErrorMessage() ?? 'Gagal memproses checkout transaksi'
             ]);
             exit;
         }
 
-        $saleData = $saleResp->getData();
-        $saleId = $saleData['id'] ?? null;
-        if (!$saleId) {
-            echo json_encode(['success' => false, 'ok' => false, 'message' => 'Backend tidak mengembalikan ID transaksi', 'msg' => 'Backend tidak mengembalikan ID transaksi']);
-            exit;
-        }
+        $resData = $checkoutResp->getData();
 
-        // 2. Eksekusi Pembayaran di backend
-        $totalTagihan = (int)($saleData['total'] ?? ($cart['total'] ?? 0));
-        if ($method === 'CASH' && $amountPaid < $totalTagihan) {
-            echo json_encode([
-                'success' => false,
-                'ok' => false,
-                'message' => "Uang tunai kurang! Tagihan: Rp " . number_format($totalTagihan, 0, ',', '.') . ", Diberikan: Rp " . number_format($amountPaid, 0, ',', '.'),
-                'msg' => "Uang tunai kurang! Tagihan: Rp " . number_format($totalTagihan, 0, ',', '.')
-            ]);
-            exit;
-        }
-
-        $paymentPayload = [
-            'method' => $method,
-            'amountPaid' => ($method === 'CASH') ? $amountPaid : $totalTagihan,
-            'items' => $items,
-            'discountAmount' => (int)($saleData['discountAmount'] ?? ($cart['discountAmount'] ?? 0)),
-            'taxAmount' => (int)($saleData['taxAmount'] ?? ($cart['taxAmount'] ?? 0)),
-            'customerId' => $customerId,
-        ];
-
-        $payResp = $this->api->post("/sales/{$saleId}/payments", $paymentPayload);
-        if (!$payResp->isSuccess()) {
-            echo json_encode([
-                'success' => false,
-                'ok' => false,
-                'message' => 'Pembayaran gagal: ' . ($payResp->getErrorMessage() ?? 'Gagal memproses metode ' . $method),
-                'msg' => 'Pembayaran gagal: ' . ($payResp->getErrorMessage() ?? 'Gagal memproses metode ' . $method)
-            ]);
-            exit;
-        }
-
-        $paymentData = $payResp->getData();
-
-        // 3. Clear cart setelah pembayaran berhasil
+        // Kosongkan keranjang hanya setelah checkout berhasil dikonfirmasi backend
         Cart::clear();
 
         echo json_encode([
             'success' => true,
             'ok' => true,
-            'sale' => $saleData,
-            'payment' => $paymentData,
-            'total' => $paymentData['total'] ?? $totalTagihan,
-            'change' => $paymentData['changeAmount'] ?? max(0, $amountPaid - $totalTagihan),
-            'message' => 'Transaksi berhasil diselesaikan!'
+            'data' => [
+                'paymentId' => $resData['transactionId'] ?? ('PAY-' . time()),
+                'transactionId' => $resData['transactionId'] ?? '',
+                'transactionNumber' => $resData['transactionNumber'] ?? ('TRX-' . time()),
+                'method' => $method,
+                'subtotal' => $resData['subtotal'] ?? 0,
+                'discountAmount' => $resData['discount'] ?? 0,
+                'taxAmount' => $resData['tax'] ?? 0,
+                'total' => $resData['total'] ?? 0,
+                'amountPaid' => $resData['amountPaid'] ?? $amountPaid,
+                'change' => $resData['change'] ?? 0,
+                'changeAmount' => $resData['change'] ?? 0,
+                'items' => $resData['items'] ?? $items,
+                'createdAt' => $resData['createdAt'] ?? date('c'),
+            ],
+            'change' => $resData['change'] ?? 0
         ]);
         exit;
     }

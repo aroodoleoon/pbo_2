@@ -68,6 +68,9 @@ switch ($page) {
     case 'api-search':
         $posCtrl->apiSearch();
         break;
+    case 'api-barcode-scan':
+        $posCtrl->apiBarcodeScan();
+        break;
     case 'api-add-cart':
         $posCtrl->apiAddToCart();
         break;

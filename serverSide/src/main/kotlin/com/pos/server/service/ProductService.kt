@@ -29,6 +29,10 @@ class ProductService(
         return barangRepository.findByIdOrThrow(id)
     }
 
+    fun getProductByBarcode(barcode: String): Barang? {
+        return barangRepository.findByKode(barcode)
+    }
+
     fun createProduct(request: CreateProductRequest, employeeId: String = "SYSTEM"): Barang {
         if (barangRepository.findByKode(request.barcode) != null) {
             throw ValidasiException("Kode barcode '${request.barcode}' sudah terdaftar pada barang lain.")
