@@ -30,6 +30,9 @@ $rows = array_filter($products, function (\PosClient\Models\Product $p) use ($q,
 <div class="bar">
     <p class="mut">Kelola harga beli/jual, audit stok fisik, dan peringatan restok.</p>
     <div class="acts">
+        <button type="button" class="btn ghost" onclick="document.getElementById('dlgCat').showModal()">
+            <?= ic('tag', 16) ?> Tambah kategori baru
+        </button>
         <button type="button" class="btn" onclick="document.getElementById('mk').showModal()">
             <?= ic('plus', 16) ?> Tambah barang baru
         </button>
@@ -118,15 +121,17 @@ $rows = array_filter($products, function (\PosClient\Models\Product $p) use ($q,
             <input name="name" required placeholder="Nama lengkap produk">
         </label>
         <label class="f">
-            Kategori
-            <select name="cat" required>
-                <?php if (empty($categories)): ?>
-                    <option value="">(Umum / Retail)</option>
-                <?php else: ?>
-                    <?php foreach ($categories as $cat): ?>
-                        <option value="<?= e($cat['id']) ?>"><?= e($cat['name']) ?></option>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+            <span style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Kategori</span>
+                <button type="button" onclick="document.getElementById('mk').close(); document.getElementById('dlgCat').showModal();" style="background:none; border:none; padding:0; font-size:12px; color:var(--pri, #006a60); text-decoration:underline; cursor:pointer;">
+                    + Kategori baru
+                </button>
+            </span>
+            <select name="cat">
+                <option value="">(Tanpa Kategori / Default)</option>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?= e($cat['id']) ?>"><?= e($cat['name']) ?></option>
+                <?php endforeach; ?>
             </select>
         </label>
         <div class="two">
@@ -155,6 +160,26 @@ $rows = array_filter($products, function (\PosClient\Models\Product $p) use ($q,
             </button>
             <button class="btn" type="submit">
                 <?= ic('save', 16) ?> Simpan barang
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<!-- Modal Dialog Tambah Kategori Baru -->
+<dialog id="dlgCat">
+    <form method="post" action="?page=do-create-category">
+        <h3><?= ic('tag', 20) ?> Tambah kategori baru</h3>
+        <p class="mut" style="font-size:12px; margin:4px 0 12px 0;">Kategori membantu mengelompokkan produk di katalog dan kasir POS.</p>
+        <label class="f">
+            Nama kategori
+            <input name="name" required placeholder="Contoh: Susu & Olahan, Biskuit, Elektronik" autofocus>
+        </label>
+        <div class="acts" style="margin-top:16px;">
+            <button type="button" class="btn ghost" onclick="document.getElementById('dlgCat').close()">
+                <?= ic('x', 16) ?> Batal
+            </button>
+            <button class="btn" type="submit">
+                <?= ic('save', 16) ?> Simpan kategori
             </button>
         </div>
     </form>
