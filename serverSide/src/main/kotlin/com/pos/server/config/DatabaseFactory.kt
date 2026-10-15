@@ -8,6 +8,9 @@ import javax.sql.DataSource
 
 object DatabaseFactory {
     fun createDataSource(config: DatabaseConfig): DataSource {
+        val isDockerOrProd = (System.getenv("POSTGRES_HOST") != null && System.getenv("POSTGRES_HOST") != "localhost") ||
+                System.getenv("APP_ENV")?.lowercase() == "production"
+
         val ds = try {
             val pgDs = PGSimpleDataSource()
             pgDs.setURL(config.url)
@@ -20,8 +23,15 @@ object DatabaseFactory {
             }
             pgDs
         } catch (e: Exception) {
-            println("[DATABASE WARNING] PostgreSQL tidak dapat dihubungi (${e.message}).")
-            println("[DATABASE FALLBACK] Mengaktifkan In-Memory PostgreSQL Mode (H2) untuk testing instan...")
+            println("[DATABASE ERROR] PostgreSQL tidak dapat dihubungi (${e.message}).")
+            if (isDockerOrProd) {
+                throw IllegalStateException(
+                    "FATAL: Gagal terhubung ke database PostgreSQL pada '${config.url}'. " +
+                    "Mode Docker/Produksi melarang fallback diam-diam ke H2 in-memory. " +
+                    "Pastikan service pos-postgres aktif dan sehat.", e
+                )
+            }
+            println("[DATABASE FALLBACK] Mode Lokal: Mengaktifkan In-Memory PostgreSQL Mode (H2) untuk testing instan...")
             return createInMemoryDataSource()
         }
 

@@ -3,6 +3,7 @@ package com.pos.server.routes
 import com.pos.server.dto.auth.CreateEmployeeRequest
 import com.pos.server.dto.auth.LoginRequest
 import com.pos.server.dto.common.ApiErrorResponse
+import com.pos.server.plugins.requireAuth
 import com.pos.server.service.AuthService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -36,11 +37,13 @@ fun Route.authRoutes(authService: AuthService) {
 
     route("/employees") {
         get {
+            val user = call.requireAuth(authService, listOf("ADMIN")) ?: return@get
             val list = authService.getAllEmployees()
             call.respond(HttpStatusCode.OK, list)
         }
 
         post {
+            val user = call.requireAuth(authService, listOf("ADMIN")) ?: return@post
             try {
                 val req = call.receive<CreateEmployeeRequest>()
                 val res = authService.createEmployee(req)
@@ -53,6 +56,7 @@ fun Route.authRoutes(authService: AuthService) {
         }
 
         post("/{id}/toggle") {
+            val user = call.requireAuth(authService, listOf("ADMIN")) ?: return@post
             try {
                 val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", "ID diperlukan."))
                 val res = authService.toggleStatus(id)
@@ -63,6 +67,7 @@ fun Route.authRoutes(authService: AuthService) {
         }
 
         delete("/{id}") {
+            val user = call.requireAuth(authService, listOf("ADMIN")) ?: return@delete
             try {
                 val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", "ID diperlukan."))
                 authService.deleteEmployee(id)

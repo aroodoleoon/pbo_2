@@ -83,3 +83,4 @@
 | 10 | Laporan | Rekonsiliasi omzet vs transaksi sukses | Angka laporan 100% cocok dengan transaksi |
 | 11 | NoSQL Log | Pengecekan event audit | Log tersimpan di MongoDB |
 | 12 | Recovery | Restart container backend & postgres | Data tetap utuh (volume persisted) |
+

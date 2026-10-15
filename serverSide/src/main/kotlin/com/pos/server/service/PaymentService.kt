@@ -190,5 +190,124 @@ class PaymentService(
             )
         }
     }
+
+    private val idempotencyCache = java.util.concurrent.ConcurrentHashMap<String, com.pos.server.dto.sales.CheckoutResponse>()
+
+    fun checkout(cashierId: String, request: com.pos.server.dto.sales.CheckoutRequest): com.pos.server.dto.sales.CheckoutResponse {
+        val key = request.idempotencyKey?.trim()
+        if (!key.isNullOrBlank()) {
+            idempotencyCache[key]?.let { return it }
+        }
+
+        require(request.items.isNotEmpty()) { "Keranjang belanja tidak boleh kosong." }
+        require(request.items.all { it.productId.isNotBlank() && it.quantity > 0 }) {
+            "ID produk harus diisi dan kuantitas harus lebih dari nol."
+        }
+        require(request.payment.amountPaid >= 0) { "Nominal bayar tidak boleh negatif." }
+
+        val method = PaymentMethod.fromString(request.payment.method)
+        val transactionId = UUID.randomUUID().toString()
+        val transactionNumber = "TRX-${System.currentTimeMillis()}"
+        val paymentId = "PAY-${UUID.randomUUID()}"
+
+        val response = transaksiRepository.inTransaction { c ->
+            val saleItems = request.items.map { SaleItemRequest(it.productId, it.quantity) }
+            val lines = stockGateway.prepareSale(c, saleItems)
+            require(lines.isNotEmpty()) { "Detail transaksi tidak ditemukan." }
+
+            val subtotal = lines.fold(0L) { sum, line -> Math.addExact(sum, line.subtotal) }
+            val discount = 0L
+            val tax = 0L
+            val total = subtotal - discount + tax
+
+            val (amountPaid, change) = when (method) {
+                PaymentMethod.CASH -> {
+                    if (request.payment.amountPaid < total) {
+                        throw ValidasiException("Pembayaran tunai kurang dari total belanja (Total: Rp$total, Dibayar: Rp${request.payment.amountPaid}).")
+                    }
+                    Pair(request.payment.amountPaid, request.payment.amountPaid - total)
+                }
+                PaymentMethod.QRIS, PaymentMethod.TRANSFER, PaymentMethod.DEBIT -> {
+                    Pair(total, 0L)
+                }
+            }
+
+            // Simpan header transaksi
+            transaksiRepository.insertSaleHeader(
+                c = c,
+                transactionId = transactionId,
+                transactionNumber = transactionNumber,
+                cashierId = cashierId,
+                customerId = request.customerId,
+                subtotal = subtotal,
+                discount = discount,
+                tax = tax,
+                total = total,
+                discountDescription = null
+            )
+
+            // Simpan detail transaksi
+            lines.forEachIndexed { index, line ->
+                transaksiRepository.insertSaleDetail(
+                    c = c,
+                    detailId = "$transactionId-D${index + 1}",
+                    transactionId = transactionId,
+                    productId = line.itemId,
+                    quantity = line.quantity,
+                    priceAtTransaction = line.unitPrice,
+                    subtotal = line.subtotal
+                )
+            }
+
+            // Simpan pembayaran
+            transaksiRepository.insertPayment(
+                c = c,
+                paymentId = paymentId,
+                transactionId = transactionId,
+                method = method,
+                amountPaid = amountPaid,
+                change = change,
+                status = PaymentStatus.SUCCESS
+            )
+
+            // Kurangi stok dan catat pergerakan stok atomik via StockGateway
+            stockGateway.applySale(c, transactionId, cashierId, lines)
+
+            val itemResponses = lines.map {
+                com.pos.server.dto.sales.CheckoutItemResponseDto(
+                    productId = it.itemId,
+                    productName = it.itemName,
+                    quantity = it.quantity,
+                    price = it.unitPrice,
+                    subtotal = it.subtotal
+                )
+            }
+
+            com.pos.server.dto.sales.CheckoutResponse(
+                transactionId = transactionId,
+                transactionNumber = transactionNumber,
+                status = "COMPLETED",
+                subtotal = subtotal,
+                discount = discount,
+                tax = tax,
+                total = total,
+                amountPaid = amountPaid,
+                change = change,
+                items = itemResponses,
+                payment = com.pos.server.dto.sales.CheckoutPaymentResponseDto(
+                    method = method.name,
+                    amountPaid = amountPaid,
+                    change = change,
+                    status = "SUCCESS"
+                ),
+                createdAt = Instant.now().toString()
+            )
+        }
+
+        if (!key.isNullOrBlank()) {
+            idempotencyCache[key] = response
+        }
+        return response
+    }
 }
 

@@ -170,11 +170,7 @@ class InventoryService(
     }
 
     private fun dataSourceConnection(): Connection {
-        // Mendapatkan koneksi baru untuk pencatatan mandiri
-        val field = BarangRepository::class.java.getDeclaredField("dataSource")
-        field.isAccessible = true
-        val ds = field.get(barangRepository) as javax.sql.DataSource
-        return ds.connection
+        return barangRepository.dataSource.connection
     }
 }
 

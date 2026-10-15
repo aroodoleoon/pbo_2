@@ -6,7 +6,7 @@ import java.sql.Connection
 import java.sql.ResultSet
 import javax.sql.DataSource
 
-class BarangRepository(private val dataSource: DataSource) {
+class BarangRepository(val dataSource: DataSource) {
 
     private fun mapRow(rs: ResultSet): Barang {
         val barang = Barang(

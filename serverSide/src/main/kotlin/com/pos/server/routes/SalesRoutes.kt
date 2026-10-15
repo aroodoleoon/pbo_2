@@ -16,6 +16,23 @@ import io.ktor.server.routing.route
 
 fun Route.salesRoutes(salesService: SalesService, paymentService: PaymentService) {
     route("/sales") {
+        post("/checkout") {
+            try {
+                val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"
+                val req = call.receive<com.pos.server.dto.sales.CheckoutRequest>()
+                val res = paymentService.checkout(cashierId, req)
+                call.respond(HttpStatusCode.Created, res)
+            } catch (e: com.pos.server.domain.exception.StokTidakCukupException) {
+                call.respond(HttpStatusCode.Conflict, ApiErrorResponse("OUT_OF_STOCK", e.message ?: "Stok barang tidak mencukupi."))
+            } catch (e: com.pos.server.domain.exception.ValidasiException) {
+                call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", e.message ?: "Validasi checkout gagal."))
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", e.message ?: "Data checkout tidak valid."))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, ApiErrorResponse("SERVER_ERROR", e.message ?: "Gagal memproses checkout."))
+            }
+        }
+
         post {
             try {
                 val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"

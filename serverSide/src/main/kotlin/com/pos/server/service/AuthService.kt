@@ -31,16 +31,19 @@ class AuthService(
             throw AutentikasiException("Username atau kata sandi salah.")
         }
 
+        val user = UserResponse(
+            id = karyawan.id,
+            name = karyawan.nama,
+            username = karyawan.username,
+            role = karyawan.role.name,
+            active = karyawan.aktif
+        )
         val token = "POS-TOKEN-${karyawan.id}-${UUID.randomUUID()}"
+        com.pos.server.plugins.TokenManager.registerSession(token, user)
+
         return LoginResponse(
             accessToken = token,
-            user = UserResponse(
-                id = karyawan.id,
-                name = karyawan.nama,
-                username = karyawan.username,
-                role = karyawan.role.name,
-                active = karyawan.aktif
-            )
+            user = user
         )
     }
 

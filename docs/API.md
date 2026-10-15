@@ -157,3 +157,4 @@ Endpoint atomik ACID untuk transaksi penjualan.
 - `POST /employees` — Daftarkan akun baru (password otomatis di-hash SHA-256 / BCrypt)
 - `POST /employees/{id}/toggle` — Aktif / Nonaktifkan akun
 - `DELETE /employees/{id}` — Hapus / Arsipkan akun
+
