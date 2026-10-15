@@ -36,14 +36,14 @@ fun Application.configureRouting(dataSource: DataSource, mongoDatabase: MongoDat
             productRoutes(productService)
             inventoryRoutes(inventoryService)
             customerRoutes(customerService)
-            salesRoutes(salesService, paymentService, auditLogService)
+            salesRoutes(salesService, paymentService, authService, auditLogService)
             reportRoutes(reportService)
             auditLogRoutes(auditLogService, authService)
         }
 
         // Backward compatibility dengan root route /api dari Modul 5
         route("/api") {
-            salesRoutes(salesService, paymentService, auditLogService)
+            salesRoutes(salesService, paymentService, authService, auditLogService)
             reportRoutes(reportService)
         }
     }

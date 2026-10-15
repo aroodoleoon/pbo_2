@@ -22,36 +22,20 @@ object TokenManager {
             token.substring(7).trim()
         } else token.trim()
 
-        // 1. Cek memory session cache
-        sessions[clean]?.let { return it }
-
-        // 2. Fallback verifikasi ke database jika server baru restart: POS-TOKEN-{id}-{uuid}
-        if (clean.startsWith("POS-TOKEN-") && authService != null) {
-            val raw = clean.removePrefix("POS-TOKEN-")
-            // ID karyawan berformat UUID atau custom ID (cth: 22222222-2222-2222-2222-222222222222)
-            val parts = raw.split("-")
-            if (parts.size >= 5) {
-                // Reconstruct UUID karyawan jika format UUID baku (8-4-4-4-12)
-                val candidateId = parts.take(5).joinToString("-")
-                try {
-                    val k = authService.getKaryawanById(candidateId)
-                    if (k.aktif) {
-                        val user = UserResponse(k.id, k.nama, k.username, k.role.name, k.aktif)
-                        sessions[clean] = user
-                        return user
-                    }
-                } catch (_: Exception) {}
-            }
-        }
-        return null
+        // Validasi ketat: Hanya token acak yang terdaftar dalam sesi valid yang diizinkan
+        return sessions[clean]
     }
 
-    fun revoke(token: String?) {
-        if (token.isNullOrBlank()) return
+    fun revoke(token: String?): Boolean {
+        if (token.isNullOrBlank()) return false
         val clean = if (token.startsWith("Bearer ", ignoreCase = true)) {
             token.substring(7).trim()
         } else token.trim()
-        sessions.remove(clean)
+        return sessions.remove(clean) != null
+    }
+
+    fun clearAll() {
+        sessions.clear()
     }
 }
 

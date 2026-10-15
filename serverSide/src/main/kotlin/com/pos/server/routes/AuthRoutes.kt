@@ -49,6 +49,20 @@ fun Route.authRoutes(authService: AuthService, auditLogService: com.pos.server.s
         }
 
         post("/logout") {
+            val authHeader = call.request.headers[io.ktor.http.HttpHeaders.Authorization]
+                ?: call.request.headers["X-Auth-Token"]
+            val user = com.pos.server.plugins.TokenManager.findUser(authHeader)
+            val revoked = com.pos.server.plugins.TokenManager.revoke(authHeader)
+            if (user != null) {
+                auditLogService?.log(
+                    actorId = user.id,
+                    action = "LOGOUT",
+                    entityType = "AUTH",
+                    entityId = user.id,
+                    result = "SUCCESS",
+                    metadata = """{"username":"${user.username}","revoked":$revoked}"""
+                )
+            }
             call.respond(HttpStatusCode.OK, mapOf("message" to "Berhasil keluar dari sesi."))
         }
     }

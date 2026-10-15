@@ -4,6 +4,9 @@ import com.pos.server.dto.common.ApiErrorResponse
 import com.pos.server.dto.sales.CashPaymentLegacyRequest
 import com.pos.server.dto.sales.CreateSaleRequest
 import com.pos.server.dto.sales.ProcessPaymentRequest
+import com.pos.server.plugins.requireAuth
+import com.pos.server.service.AuditLogService
+import com.pos.server.service.AuthService
 import com.pos.server.service.PaymentService
 import com.pos.server.service.SalesService
 import io.ktor.http.HttpStatusCode
@@ -17,11 +20,14 @@ import io.ktor.server.routing.route
 fun Route.salesRoutes(
     salesService: SalesService,
     paymentService: PaymentService,
-    auditLogService: com.pos.server.service.AuditLogService? = null
+    authService: AuthService,
+    auditLogService: AuditLogService? = null
 ) {
     route("/sales") {
         post("/checkout") {
-            val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"
+            // Autentikasi ketat: Kasir harus terautentikasi dan identitas diambil dari sesi valid
+            val user = call.requireAuth(authService, listOf("ADMIN", "CASHIER")) ?: return@post
+            val cashierId = user.id
             try {
                 val req = call.receive<com.pos.server.dto.sales.CheckoutRequest>()
                 val res = paymentService.checkout(cashierId, req)
@@ -54,8 +60,9 @@ fun Route.salesRoutes(
         }
 
         post {
+            val user = call.requireAuth(authService, listOf("ADMIN", "CASHIER")) ?: return@post
+            val cashierId = user.id
             try {
-                val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"
                 val req = call.receive<CreateSaleRequest>()
                 val res = salesService.createSale(cashierId, req)
                 call.respond(HttpStatusCode.Created, res)
@@ -65,9 +72,10 @@ fun Route.salesRoutes(
         }
 
         post("/{id}/payments") {
+            val user = call.requireAuth(authService, listOf("ADMIN", "CASHIER")) ?: return@post
+            val cashierId = user.id
             try {
                 val transactionId = call.parameters["id"] ?: throw IllegalArgumentException("ID transaksi diperlukan.")
-                val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"
                 val req = call.receive<ProcessPaymentRequest>()
 
                 // Menggunakan payload detail transaksi jika disediakan, atau default pembayaran
@@ -90,6 +98,7 @@ fun Route.salesRoutes(
     // Kompatibilitas langsung dengan endpoint Modul 5 Josua
     route("/payments") {
         post("/cash") {
+            val user = call.requireAuth(authService, listOf("ADMIN", "CASHIER")) ?: return@post
             try {
                 val req = call.receive<CashPaymentLegacyRequest>()
                 val result = paymentService.payCashLegacy(req)
@@ -102,4 +111,3 @@ fun Route.salesRoutes(
         }
     }
 }
-
