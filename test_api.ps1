@@ -1,5 +1,5 @@
 # Skrip Otomatis Pengujian API Sistem POS
-$baseUrl = "http://127.0.0.1:8080/api/v1"
+$baseUrl = "http://103.119.237.19:3232/api/v1"
 
 Write-Host "`n===============================================" -ForegroundColor Cyan
 Write-Host "      PENGUJIAN API SISTEM KASIR POS           " -ForegroundColor Cyan

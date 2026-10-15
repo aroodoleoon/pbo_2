@@ -8,9 +8,9 @@ class ApiClient
     private string $baseUrl;
     private int $timeout;
 
-    public function __construct(string $baseUrl = Config::API_BASE_URL, int $timeout = 8)
+    public function __construct(?string $baseUrl = null, int $timeout = 8)
     {
-        $this->baseUrl = rtrim($baseUrl, '/');
+        $this->baseUrl = rtrim($baseUrl ?: Config::getApiBaseUrl(), '/');
         $this->timeout = $timeout;
     }
 
