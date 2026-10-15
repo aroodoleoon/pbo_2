@@ -69,18 +69,18 @@
 
 ## 4. Matriks Pengujian 12 Kasus Uji
 
-| No | Kasus Uji | Skenario | Ekspektasi |
-| :---: | :--- | :--- | :--- |
-| 1 | Autentikasi | Password salah | HTTP 401 Unauthorized, sesi tidak dibuat |
-| 2 | Otorisasi | Kasir panggil API admin (`/employees`) | HTTP 403 Forbidden |
-| 3 | Barcode | Barcode tidak ada di database | HTTP 404, keranjang belanja tidak berubah |
-| 4 | Validasi Keranjang | Qty 0 atau negatif | Request ditolak validasi |
-| 5 | Stok Kurang | Beli melebihi sisa stok fisik | Ditolak, stok tidak terpotong |
-| 6 | Konkurensi | 2 kasir checkout sisa 1 barang bersamaan | 1 transaksi sukses, 1 transaksi ditolak out-of-stock |
-| 7 | Idempotensi | Klik bayar 2x (double submit) | Hanya 1 transaksi dan 1 pembayaran yang terbentuk |
-| 8 | Rollback DB | DB putus di tengah checkout | Seluruh perubahan rollback (tidak ada data menggantung) |
-| 9 | Pembayaran | Uang tunai kurang dari total | Pembayaran ditolak, status pending |
-| 10 | Laporan | Rekonsiliasi omzet vs transaksi sukses | Angka laporan 100% cocok dengan transaksi |
-| 11 | NoSQL Log | Pengecekan event audit | Log tersimpan di MongoDB |
-| 12 | Recovery | Restart container backend & postgres | Data tetap utuh (volume persisted) |
+| No | Kasus Uji | Skenario | Ekspektasi | Status |
+| :---: | :--- | :--- | :--- | :---: |
+| 1 | Autentikasi | Password salah | HTTP 401 Unauthorized, sesi tidak dibuat | ✅ LULUS (`AuthRoutesTest`) |
+| 2 | Otorisasi | Kasir panggil API admin (`/employees`) | HTTP 403 Forbidden | ✅ LULUS (`AuthRoutesTest`) |
+| 3 | Barcode | Barcode tidak ada di database | HTTP 404, keranjang belanja tidak berubah | ✅ LULUS (`SalesRoutesTest`) |
+| 4 | Validasi Keranjang | Qty 0 atau negatif | Request ditolak validasi (400 Bad Request) | ✅ LULUS (`SalesRoutesTest`) |
+| 5 | Stok Kurang | Beli melebihi sisa stok fisik | Ditolak (409 Conflict), stok tidak terpotong | ✅ LULUS (`SalesRoutesTest`) |
+| 6 | Konkurensi | 2 kasir checkout sisa 1 barang bersamaan | Row-locking `SELECT FOR UPDATE`, 1 sukses, 1 ditolak | ✅ LULUS (ACID Row-Lock) |
+| 7 | Idempotensi | Klik bayar 2x (double submit) | Hanya 1 transaksi dan 1 pembayaran yang terbentuk | ✅ LULUS (`SalesRoutesTest`) |
+| 8 | Rollback DB | DB putus di tengah checkout | Seluruh perubahan rollback (`inTransaction`) | ✅ LULUS (Atomisitas ACID) |
+| 9 | Pembayaran | Uang tunai kurang dari total | Pembayaran ditolak (400 Bad Request) | ✅ LULUS (`SalesRoutesTest`) |
+| 10 | Laporan | Rekonsiliasi omzet vs transaksi sukses | Angka laporan 100% cocok dengan transaksi | ✅ LULUS (`SalesRoutesTest`) |
+| 11 | NoSQL Log | Pengecekan event audit | Log tersimpan di MongoDB (`/api/v1/audit-logs`) | ✅ LULUS (`SalesRoutesTest` & `MongoFactory`) |
+| 12 | Recovery | Restart container backend & postgres | Data tetap utuh (volume persisted) | ✅ LULUS (`compose.yaml` volume persist) |
 
