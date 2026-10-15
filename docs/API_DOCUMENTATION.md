@@ -9,7 +9,7 @@ Dokumentasi lengkap antarmuka pemrograman aplikasi (REST API) untuk Sistem Kasir
 * **Format Payload**: `application/json; charset=utf-8`
 * **Format Waktu**: ISO-8601 UTC (contoh: `2026-10-14T02:24:23.838Z`)
 * **Tipe Mata Uang**: Bilangan bulat (integer) Rupiah tanpa desimal (contoh: `15000` untuk Rp 15.000)
-
+2
 ---
 
 ## 2. Standar Header & Autentikasi

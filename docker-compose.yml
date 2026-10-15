@@ -31,12 +31,26 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-pos_db}
       POSTGRES_USER: ${POSTGRES_USER:-pos_app}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pos_password}
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017/pos_logs}
       PORT: 8080
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
+      mongodb:
+        condition: service_started
+
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: pos-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: pos_logs
 
   client:
     build:
@@ -54,4 +68,5 @@ services:
 
 volumes:
   postgres_data:
+  mongo_data:
 
