@@ -39,6 +39,21 @@ class PosController
         $rawCustomers = $customersResponse->isSuccess() ? ($customersResponse->getData() ?? []) : [];
         $customers = array_map(fn($c) => new Customer($c), $rawCustomers);
 
+        // Statistik katalog untuk panel "Katalog Barang"
+        $totalPhysicalStock = 0;
+        $totalAssetValue = 0;
+        $oosCount = 0;
+        $lowStockCount = 0;
+        foreach ($products as $p) {
+            $totalPhysicalStock += $p->getStock();
+            $totalAssetValue += $p->getStock() * $p->getBuyPrice();
+            if ($p->isOutOfStock()) {
+                $oosCount++;
+            } elseif ($p->isLowStock()) {
+                $lowStockCount++;
+            }
+        }
+
         $cartSummary = Cart::calculateSummary();
         $user = Session::getAuthUser();
 
@@ -234,7 +249,45 @@ class PosController
         ];
 
         $checkoutResp = $this->api->post('/sales/checkout', $checkoutPayload);
-        if (!$checkoutResp->isSuccess()) {
+        $resData = null;
+        if ($checkoutResp->isSuccess()) {
+            $resData = $checkoutResp->getData();
+        } else {
+            // Fallback: 2-step checkout (/sales + /sales/{id}/payments)
+            $saleResp = $this->api->post('/sales', [
+                'customerId' => $customerId,
+                'items' => $items,
+                'discountAmount' => (int)($input['discountAmount'] ?? ($cart['discountAmount'] ?? 0)),
+            ]);
+            if ($saleResp->isSuccess()) {
+                $saleData = $saleResp->getData();
+                $saleId = $saleData['id'] ?? null;
+                if ($saleId) {
+                    $totalTagihan = (int)($saleData['total'] ?? ($cart['total'] ?? 0));
+                    $payResp = $this->api->post("/sales/{$saleId}/payments", [
+                        'method' => $method,
+                        'amountPaid' => ($method === 'CASH') ? $amountPaid : $totalTagihan,
+                    ]);
+                    if ($payResp->isSuccess()) {
+                        $pData = $payResp->getData();
+                        $resData = [
+                            'transactionId' => $saleId,
+                            'transactionNumber' => $saleData['transactionNumber'] ?? ('TRX-' . time()),
+                            'subtotal' => $saleData['subtotal'] ?? 0,
+                            'discount' => $saleData['discountAmount'] ?? 0,
+                            'tax' => $saleData['taxAmount'] ?? 0,
+                            'total' => $pData['total'] ?? $totalTagihan,
+                            'amountPaid' => $amountPaid,
+                            'change' => $pData['changeAmount'] ?? max(0, $amountPaid - $totalTagihan),
+                            'items' => $items,
+                            'createdAt' => date('c'),
+                        ];
+                    }
+                }
+            }
+        }
+
+        if (!$resData) {
             echo json_encode([
                 'success' => false,
                 'ok' => false,
@@ -244,14 +297,19 @@ class PosController
             exit;
         }
 
-        $resData = $checkoutResp->getData();
-
         // Kosongkan keranjang hanya setelah checkout berhasil dikonfirmasi backend
         Cart::clear();
 
         echo json_encode([
             'success' => true,
             'ok' => true,
+            'sale' => [
+                'id' => $resData['transactionId'] ?? '',
+                'no' => $resData['transactionNumber'] ?? '',
+                'total' => $resData['total'] ?? 0
+            ],
+            'total' => $resData['total'] ?? 0,
+            'change' => $resData['change'] ?? 0,
             'data' => [
                 'paymentId' => $resData['transactionId'] ?? ('PAY-' . time()),
                 'transactionId' => $resData['transactionId'] ?? '',
@@ -266,8 +324,7 @@ class PosController
                 'changeAmount' => $resData['change'] ?? 0,
                 'items' => $resData['items'] ?? $items,
                 'createdAt' => $resData['createdAt'] ?? date('c'),
-            ],
-            'change' => $resData['change'] ?? 0
+            ]
         ]);
         exit;
     }

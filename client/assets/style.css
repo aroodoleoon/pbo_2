@@ -107,3 +107,5 @@ body.wide .body{max-width:none}
 }
 @media print{.collapse{display:none!important}}
 [hidden]{display:none!important}
+
+input.ket{min-width:200px;width:100%}

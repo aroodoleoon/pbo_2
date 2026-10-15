@@ -5,6 +5,7 @@ namespace PosClient\Controllers;
 
 use PosClient\ApiClient;
 use PosClient\Session;
+use PosClient\Http;
 
 class AuthController
 {
@@ -18,7 +19,7 @@ class AuthController
     public function showLogin(): void
     {
         if (Session::isLoggedIn()) {
-            header('Location: ?page=pos');
+            header('Location: ' . (Http::isManager() ? '?page=reports' : '?page=pos'));
             exit;
         }
 
@@ -48,18 +49,34 @@ class AuthController
         }
 
         $data = $response->getData();
-        Session::set('accessToken', $data['accessToken'] ?? 'DUMMY-TOKEN');
         $user = $data['user'] ?? [
             'id' => '11111111-1111-1111-1111-111111111111',
             'name' => $username,
             'username' => $username,
             'role' => (($_POST['role'] ?? '') === 'manager' || str_contains(strtolower($username), 'admin')) ? 'ADMIN' : 'CASHIER'
         ];
+
+        // Peran yang dipilih di form harus cocok dengan peran akun di backend
+        $apiRole = strtoupper((string)($user['role'] ?? ''));
+        $realRole = ($apiRole === 'ADMIN' || $apiRole === 'MANAGER') ? 'manager' : 'kasir';
+        $chosen = (string)($_POST['role'] ?? '');
+        if (($user['active'] ?? true) === false) {
+            Session::setFlash('error', 'Akun ini sudah dinonaktifkan.');
+            header('Location: ?page=login');
+            exit;
+        }
+        if ($chosen !== '' && $chosen !== $realRole) {
+            Session::setFlash('error', 'Akun ini terdaftar sebagai ' . ucfirst($realRole) . '. Pilih peran yang sesuai.');
+            header('Location: ?page=login');
+            exit;
+        }
+
+        session_regenerate_id(true);
+        Session::set('accessToken', $data['accessToken'] ?? 'DUMMY-TOKEN');
         Session::set('user', $user);
 
         Session::setFlash('success', 'Selamat datang kembali, ' . htmlspecialchars($user['name'] ?? $username));
-        $isManager = strtoupper((string)($user['role'] ?? '')) === 'ADMIN';
-        header('Location: ' . ($isManager ? '?page=reports' : '?page=pos'));
+        header('Location: ' . ($realRole === 'manager' ? '?page=reports' : '?page=pos'));
         exit;
     }
 

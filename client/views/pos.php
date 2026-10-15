@@ -40,6 +40,16 @@ $productData = array_map(function (\PosClient\Models\Product $p) {
             <div id="grid" class="grid"></div>
             <p class="keys mut"><kbd>F2</kbd> Scan/cari &nbsp; <kbd>F9</kbd> Bayar &nbsp; <kbd>Esc</kbd> Batalkan</p>
         </div>
+
+        <!-- Panel Katalog Barang (dibuka dari sidebar) -->
+        <div class="panel" id="p-katalog" hidden>
+            <?php $panel = true; require __DIR__ . '/partials/catalog.php'; ?>
+        </div>
+
+        <!-- Panel Data Pelanggan (dibuka dari sidebar) -->
+        <div class="panel" id="p-member" hidden>
+            <?php $panel = true; require __DIR__ . '/partials/members.php'; ?>
+        </div>
     </div>
 
     <aside class="cart">
@@ -120,24 +130,13 @@ $productData = array_map(function (\PosClient\Models\Product $p) {
     </div>
 </dialog>
 
-<!-- Modal Daftar Member Baru -->
-<dialog id="mm">
-    <form method="post" action="?page=do-create-customer">
-        <h3><?= ic('userplus', 20) ?> Daftar member baru</h3>
-        <label class="f">
-            Nama pelanggan
-            <input name="name" required placeholder="Nama lengkap pelanggan">
-        </label>
-        <label class="f">
-            No. kontak / Telepon
-            <input name="contact" inputmode="tel" placeholder="08xxxxxxxxxx">
-        </label>
-        <div class="acts">
-            <button type="button" class="btn ghost" onclick="document.getElementById('mm').close()"><?= ic('x', 16) ?> Batal</button>
-            <button type="submit" class="btn"><?= ic('userplus', 16) ?> Daftarkan member</button>
-        </div>
-    </form>
-</dialog>
+<!-- Dialog Katalog & Member (dipakai panel dan tombol "Member baru" di keranjang) -->
+<?php
+$back = '?page=pos#katalog';
+require __DIR__ . '/partials/catalog_dialogs.php';
+$back = '?page=pos#member';
+require __DIR__ . '/partials/member_dialog.php';
+?>
 
 <script>
 const P = <?= json_encode($productData, JSON_UNESCAPED_UNICODE) ?>;
@@ -147,6 +146,24 @@ let cart = {};
 
 const rp = n => 'Rp ' + Math.round(n).toLocaleString('id-ID');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const TITLES = { produk: 'POS Kasir', katalog: 'Katalog Barang', member: 'Data Pelanggan' };
+
+function tab(t) {
+    if (!TITLES[t]) t = 'produk';
+    document.querySelectorAll('#side nav a[data-t]').forEach(a => a.classList.toggle('on', a.dataset.t === t));
+    document.querySelectorAll('.pos-l .panel').forEach(pn => pn.hidden = pn.id !== 'p-' + t);
+    const h = document.querySelector('.top h1');
+    if (h) h.textContent = TITLES[t];
+    try { history.replaceState(null, '', location.pathname + location.search + '#' + t); } catch (e) {}
+    $('side').classList.remove('open');
+    if (t === 'produk') $('q').focus();
+}
+
+document.querySelectorAll('#side nav a[data-t]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    tab(a.dataset.t);
+}));
 
 function resetSearch() {
     $('q').value = '';
@@ -421,6 +438,7 @@ $('q').addEventListener('keydown', async e => {
 document.addEventListener('keydown', e => {
     if (e.key === 'F2') {
         e.preventDefault();
+        tab('produk');
         $('q').focus();
     }
     if (e.key === 'F9') {
@@ -440,5 +458,6 @@ try {
 
 draw();
 calc();
+tab(location.hash.slice(1) || 'produk');
 </script>
 <?php require_once __DIR__ . '/layout/foot.php'; ?>

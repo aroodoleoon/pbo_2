@@ -11,7 +11,7 @@ class Config
 
     public static function getApiBaseUrl(): string
     {
-        return getenv('API_BASE_URL') ?: 'http://127.0.0.1:8080/api/v1';
+        return getenv('POS_API_BASE') ?: (getenv('API_BASE_URL') ?: 'http://103.119.237.19:3232/api/v1');
     }
 
     public static function getApiUrl(string $path): string

@@ -27,20 +27,7 @@ class ReportController
         $cashierFilter = (string)($_GET['cashier'] ?? 'all');
         $paymentFilter = (string)($_GET['method'] ?? 'all');
 
-        // Ambil riwayat transaksi
-        $trxResp = $this->api->get('/transactions', ['limit' => 200]);
-        $transactions = $trxResp->isSuccess() ? ($trxResp->getData() ?? []) : [];
-
-        // Filter transaksi berdasarkan kasir dan metode
-        $filteredTransactions = array_filter($transactions, function($t) use ($cashierFilter, $paymentFilter) {
-            if ($cashierFilter !== 'all' && ($t['cashierId'] ?? '') !== $cashierFilter) {
-                return false;
-            }
-            if ($paymentFilter !== 'all' && strtoupper($t['paymentMethod'] ?? '') !== strtoupper($paymentFilter)) {
-                return false;
-            }
-            return true;
-        });
+        $filteredTransactions = $this->loadFiltered($startDate, $endDate, $cashierFilter, $paymentFilter, 1000);
 
         // Hitung KPIs transaksi
         $totalTransactions = count($filteredTransactions);
@@ -81,8 +68,13 @@ class ReportController
             exit;
         }
 
-        $trxResp = $this->api->get('/transactions', ['limit' => 500]);
-        $transactions = $trxResp->isSuccess() ? ($trxResp->getData() ?? []) : [];
+        $transactions = $this->loadFiltered(
+            (string)($_GET['from'] ?? date('Y-m-01')),
+            (string)($_GET['to'] ?? date('Y-m-d')),
+            (string)($_GET['cashier'] ?? 'all'),
+            (string)($_GET['method'] ?? 'all'),
+            1000
+        );
 
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="laporan_penjualan_' . date('Ymd_His') . '.csv"');
@@ -109,5 +101,28 @@ class ReportController
         fclose($output);
         exit;
     }
-}
 
+    /** Ambil transaksi dari API lalu saring berdasarkan tanggal (zona Asia/Jakarta), kasir, dan metode. Urut terbaru dulu. */
+    private function loadFiltered(string $from, string $to, string $cashier, string $method, int $limit): array
+    {
+        $resp = $this->api->get('/transactions', ['limit' => $limit]);
+        $all = $resp->isSuccess() ? ($resp->getData() ?? []) : [];
+
+        $rows = array_filter($all, function ($t) use ($from, $to, $cashier, $method) {
+            $day = date('Y-m-d', strtotime((string)($t['transactionDate'] ?? 'now')));
+            if ($day < $from || $day > $to) {
+                return false;
+            }
+            if ($cashier !== 'all' && ($t['cashierId'] ?? '') !== $cashier) {
+                return false;
+            }
+            if ($method !== 'all' && strtoupper((string)($t['paymentMethod'] ?? '')) !== strtoupper($method)) {
+                return false;
+            }
+            return true;
+        });
+
+        usort($rows, fn($a, $b) => strcmp((string)($b['transactionDate'] ?? ''), (string)($a['transactionDate'] ?? '')));
+        return $rows;
+    }
+}

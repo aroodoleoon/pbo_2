@@ -5,6 +5,7 @@ namespace PosClient\Controllers;
 
 use PosClient\ApiClient;
 use PosClient\Session;
+use PosClient\Http;
 use PosClient\Models\Product;
 
 class InventoryController
@@ -71,8 +72,7 @@ class InventoryController
 
         if ($productId === '' || $quantity <= 0) {
             Session::setFlash('error', 'Produk dan kuantitas barang masuk harus valid.');
-            header('Location: ?page=inventory');
-            exit;
+            Http::back('?page=inventory');
         }
 
         $resp = $this->api->post('/inventory/receipts', [
@@ -88,8 +88,7 @@ class InventoryController
             Session::setFlash('error', 'Gagal restok: ' . ($resp->getErrorMessage() ?? 'Kesalahan server'));
         }
 
-        header('Location: ?page=inventory');
-        exit;
+        Http::back('?page=inventory');
     }
 
     public function adjust(): void
@@ -101,8 +100,7 @@ class InventoryController
 
         if ($productId === '' || $quantity <= 0) {
             Session::setFlash('error', 'Produk dan kuantitas penyesuaian harus valid.');
-            header('Location: ?page=inventory');
-            exit;
+            Http::back('?page=inventory');
         }
 
         $resp = $this->api->post('/inventory/adjustments', [
@@ -118,19 +116,24 @@ class InventoryController
             Session::setFlash('error', 'Gagal menyesuaikan stok: ' . ($resp->getErrorMessage() ?? 'Kesalahan server'));
         }
 
-        header('Location: ?page=inventory');
-        exit;
+        Http::back('?page=inventory');
     }
 
     public function updateStock(): void
     {
         $productId = trim((string)($_POST['id'] ?? ($_POST['productId'] ?? '')));
         $qty = (int)($_POST['qty'] ?? ($_POST['quantity'] ?? 0));
+        $ket = mb_substr(trim((string)($_POST['ket'] ?? '')), 0, 150);
 
         if ($productId === '' || $qty === 0) {
             Session::setFlash('error', 'Jumlah perubahan stok tidak boleh 0.');
-            header('Location: ?page=inventory');
-            exit;
+            Http::back('?page=inventory');
+        }
+
+        // Kasir wajib mengisi keterangan untuk setiap aksi gudang (divalidasi di server)
+        if (Http::isCashier() && $ket === '') {
+            Session::setFlash('error', 'Keterangan wajib diisi untuk setiap perubahan stok.');
+            Http::back('?page=inventory');
         }
 
         if ($qty > 0) {
@@ -138,14 +141,14 @@ class InventoryController
                 'productId' => $productId,
                 'quantity' => $qty,
                 'source' => 'Penyesuaian dari POS',
-                'notes' => 'Tambah stok via katalog'
+                'notes' => $ket !== '' ? $ket : 'Tambah stok via katalog'
             ]);
         } else {
             $resp = $this->api->post('/inventory/adjustments', [
                 'productId' => $productId,
                 'quantity' => -$qty,
                 'type' => 'OUT_DAMAGED',
-                'reason' => 'Koreksi pengurangan stok dari POS'
+                'reason' => $ket !== '' ? $ket : 'Koreksi pengurangan stok dari POS'
             ]);
         }
 
@@ -155,8 +158,7 @@ class InventoryController
             Session::setFlash('error', 'Gagal memperbarui stok: ' . ($resp->getErrorMessage() ?? 'Kesalahan server'));
         }
 
-        header('Location: ?page=inventory');
-        exit;
+        Http::back('?page=inventory');
     }
 
     public function createProduct(): void
@@ -171,8 +173,7 @@ class InventoryController
 
         if ($barcode === '' || $name === '' || $sellPrice <= 0) {
             Session::setFlash('error', 'Nama barang, barcode, dan harga jual wajib diisi.');
-            header('Location: ?page=inventory');
-            exit;
+            Http::back('?page=inventory');
         }
 
         $resp = $this->api->post('/products', [
@@ -191,8 +192,7 @@ class InventoryController
             Session::setFlash('error', 'Gagal menambah produk: ' . ($resp->getErrorMessage() ?? 'Katalog duplicate atau validasi gagal'));
         }
 
-        header('Location: ?page=inventory');
-        exit;
+        Http::back('?page=inventory');
     }
 
     public function createCategory(): void
@@ -201,8 +201,7 @@ class InventoryController
 
         if ($name === '') {
             Session::setFlash('error', 'Nama kategori wajib diisi.');
-            header('Location: ?page=inventory');
-            exit;
+            Http::back('?page=inventory');
         }
 
         $resp = $this->api->post('/categories', [
@@ -215,8 +214,7 @@ class InventoryController
             Session::setFlash('error', 'Gagal menambah kategori: ' . ($resp->getErrorMessage() ?? 'Kategori sudah ada atau terjadi kesalahan.'));
         }
 
-        header('Location: ?page=inventory');
-        exit;
+        Http::back('?page=inventory');
     }
 
     public function apiCreateCategory(): void

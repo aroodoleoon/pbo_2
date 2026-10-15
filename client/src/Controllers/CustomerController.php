@@ -5,6 +5,7 @@ namespace PosClient\Controllers;
 
 use PosClient\ApiClient;
 use PosClient\Session;
+use PosClient\Http;
 use PosClient\Models\Customer;
 
 class CustomerController
@@ -54,8 +55,7 @@ class CustomerController
 
         if ($name === '' || $contact === '') {
             Session::setFlash('error', 'Nama dan kontak pelanggan wajib diisi.');
-            header('Location: ?page=customers');
-            exit;
+            Http::back('?page=customers');
         }
 
         $resp = $this->api->post('/customers', [
@@ -72,8 +72,7 @@ class CustomerController
             Session::setFlash('error', 'Gagal mendaftarkan pelanggan: ' . ($resp->getErrorMessage() ?? 'Nomor kontak duplikat'));
         }
 
-        header('Location: ?page=customers');
-        exit;
+        Http::back('?page=customers');
     }
 }
 

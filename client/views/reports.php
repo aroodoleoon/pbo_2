@@ -25,7 +25,7 @@ $avgBasket = $n > 0 ? (int)round($totalOmzet / $n) : 0;
 <div class="bar">
     <p class="mut">Modul laporan & transaksi · Terminal akademik POS</p>
     <div class="acts">
-        <a class="btn ghost" href="?page=export-csv">
+        <a class="btn ghost" href="?<?= e(http_build_query(['page' => 'export-csv', 'from' => $startDate, 'to' => $endDate, 'method' => $paymentFilter, 'cashier' => $cashierFilter])) ?>">
             <?= ic('download', 16) ?> Ekspor CSV
         </a>
         <button type="button" class="btn ghost" onclick="window.print()">
@@ -48,7 +48,7 @@ $avgBasket = $n > 0 ? (int)round($totalOmzet / $n) : 0;
         <span class="lb"><?= ic('wallet', 15) ?> Metode</span>
         <select name="method">
             <option value="all">Semua metode</option>
-            <?php foreach (['CASH' => 'Tunai', 'QRIS' => 'QRIS', 'DEBIT' => 'Debit'] as $k => $label): ?>
+            <?php foreach (['CASH' => 'Tunai', 'QRIS' => 'QRIS', 'DEBIT' => 'Debit', 'TRANSFER' => 'Transfer'] as $k => $label): ?>
                 <option value="<?= e($k) ?>" <?= strtoupper($paymentFilter) === $k ? 'selected' : '' ?>><?= e($label) ?></option>
             <?php endforeach; ?>
         </select>
@@ -85,11 +85,11 @@ $avgBasket = $n > 0 ? (int)round($totalOmzet / $n) : 0;
         <tbody>
             <?php foreach ($filteredTransactions as $t): 
                 $trxId = $t['transactionId'] ?? ($t['id'] ?? '-');
-                $trxDate = $t['transactionDate'] ?? ($t['ts'] ?? date('Y-m-d H:i'));
+                $trxDate = date('Y-m-d H:i:s', strtotime((string)($t['transactionDate'] ?? ($t['ts'] ?? 'now'))));
                 $cashierId = $t['cashierId'] ?? ($t['kasir'] ?? '-');
                 $cust = !empty($t['customerName']) ? $t['customerName'] : (!empty($t['customerId']) ? $t['customerId'] : 'Pelanggan Umum');
                 $methodRaw = strtoupper((string)($t['paymentMethod'] ?? 'CASH'));
-                $methodLabel = ['CASH' => 'Tunai', 'QRIS' => 'QRIS', 'DEBIT' => 'Debit'][$methodRaw] ?? $methodRaw;
+                $methodLabel = ['CASH' => 'Tunai', 'QRIS' => 'QRIS', 'DEBIT' => 'Debit', 'TRANSFER' => 'Transfer'][$methodRaw] ?? $methodRaw;
                 $subtotal = (int)($t['subtotal'] ?? 0);
                 $discount = (int)($t['discountAmount'] ?? 0);
                 $total = (int)($t['total'] ?? 0);

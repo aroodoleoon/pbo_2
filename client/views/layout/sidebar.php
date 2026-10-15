@@ -16,9 +16,9 @@ $navItems = $isManager ? [
     'customers' => ['Data Pelanggan', 'users'],
     'cashiers' => ['Kelola Kasir', 'shield'],
 ] : [
-    'pos' => ['POS Kasir', 'receipt'],
-    'inventory' => ['Katalog Barang', 'box'],
-    'customers' => ['Data Pelanggan', 'users'],
+    'pos#produk' => ['POS Kasir', 'receipt'],
+    'pos#katalog' => ['Katalog Barang', 'box'],
+    'pos#member' => ['Data Pelanggan', 'users'],
 ];
 ?>
 <aside id="side">
@@ -30,10 +30,12 @@ $navItems = $isManager ? [
         </div>
     </div>
     <nav>
-        <?php foreach ($navItems as $p => $info): 
-            $isOn = ($currentPage === $p);
+        <?php foreach ($navItems as $key => $info):
+            [$pg, $tab] = array_pad(explode('#', $key, 2), 2, null);
+            $isOn = $tab !== null ? ($tab === 'produk') : ($currentPage === $pg);
+            $href = '?page=' . $pg . ($tab !== null ? '#' . $tab : '');
         ?>
-            <a href="?page=<?= e($p) ?>" title="<?= e($info[0]) ?>" class="<?= $isOn ? 'on' : '' ?>">
+            <a href="<?= e($href) ?>" <?= $tab !== null ? 'data-t="' . e($tab) . '"' : '' ?> title="<?= e($info[0]) ?>" class="<?= $isOn ? 'on' : '' ?>">
                 <?= ic($info[1], 18) ?>
                 <span><?= e($info[0]) ?></span>
             </a>

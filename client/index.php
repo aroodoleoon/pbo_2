@@ -35,6 +35,7 @@ use PosClient\Controllers\CustomerController;
 use PosClient\Controllers\CashierController;
 
 // 2. Initialize Session
+date_default_timezone_set('Asia/Jakarta');
 Session::start();
 
 // 3. Dependency Injection
@@ -46,8 +47,45 @@ $reportCtrl = new ReportController($apiClient);
 $customerCtrl = new CustomerController($apiClient);
 $cashierCtrl = new CashierController($apiClient);
 
-// 4. Request Routing
-$page = (string)($_GET['page'] ?? 'pos');
+// 4. Request Routing + otorisasi peran (ditegakkan di server)
+$isManager = \PosClient\Http::isManager();
+$page = (string)($_GET['page'] ?? ($isManager ? 'reports' : 'pos'));
+
+$publicPages = ['login', 'do-login', 'logout'];
+$managerOnly = ['reports', 'export-csv', 'cashiers', 'do-create-cashier', 'do-toggle-cashier', 'do-delete-cashier'];
+$cashierOnly = ['pos', 'api-search', 'api-barcode-scan', 'api-add-cart', 'api-update-cart', 'api-remove-cart', 'api-clear-cart', 'api-select-customer', 'api-checkout'];
+
+if (!in_array($page, $publicPages, true)) {
+    if (!Session::isLoggedIn()) {
+        if (str_starts_with($page, 'api-')) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'ok' => false, 'message' => 'Sesi berakhir, silakan login ulang.']);
+            exit;
+        }
+        header('Location: ?page=login');
+        exit;
+    }
+    if ($isManager && in_array($page, $cashierOnly, true)) {
+        Session::setFlash('error', 'Terminal kasir hanya untuk akun Kasir.');
+        header('Location: ?page=reports');
+        exit;
+    }
+    if (!$isManager && in_array($page, $managerOnly, true)) {
+        Session::setFlash('error', 'Akses ditolak: halaman ini hanya untuk Manager.');
+        header('Location: ?page=pos');
+        exit;
+    }
+    // Kasir membuka Katalog & Pelanggan sebagai panel di halaman POS (keranjang tetap ada)
+    if (!$isManager && $page === 'inventory') {
+        header('Location: ?page=pos#katalog');
+        exit;
+    }
+    if (!$isManager && $page === 'customers') {
+        header('Location: ?page=pos#member');
+        exit;
+    }
+}
 
 switch ($page) {
     // Auth Routes
