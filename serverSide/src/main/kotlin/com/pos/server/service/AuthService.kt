@@ -38,7 +38,7 @@ class AuthService(
             role = karyawan.role.name,
             active = karyawan.aktif
         )
-        val token = "POS-TOKEN-${karyawan.id}-${UUID.randomUUID()}"
+        val token = "POS-SEC-" + UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "")
         com.pos.server.plugins.TokenManager.registerSession(token, user)
 
         return LoginResponse(

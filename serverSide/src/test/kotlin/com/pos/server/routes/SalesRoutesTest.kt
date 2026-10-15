@@ -2,6 +2,7 @@ package com.pos.server.routes
 
 import com.pos.server.config.DatabaseConfig
 import com.pos.server.config.DatabaseFactory
+import com.pos.server.dto.auth.LoginResponse
 import com.pos.server.dto.product.ProductDto
 import com.pos.server.dto.sales.CheckoutItemDto
 import com.pos.server.dto.sales.CheckoutPaymentDto
@@ -43,6 +44,16 @@ class SalesRoutesTest {
         testBlock()
     }
 
+    private suspend fun ApplicationTestBuilder.loginAsCashier(): String {
+        val res = client.post("/api/v1/auth/login") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody("""{"username":"kasir1","password":"kasir123"}""")
+        }
+        assertEquals(HttpStatusCode.OK, res.status)
+        val loginData = json.decodeFromString<LoginResponse>(res.bodyAsText())
+        return loginData.accessToken
+    }
+
     @Test
     fun `TC-03 barcode scan lookup valid barcode returns 200 and non-existent returns 404`() = setupTestApp {
         // Barcode brg-001 yang ada di seed data: 89999991001 (Chitato)
@@ -58,7 +69,50 @@ class SalesRoutesTest {
     }
 
     @Test
+    fun `checkout without authentication token returns 401 Unauthorized`() = setupTestApp {
+        val checkoutReq = CheckoutRequest(
+            items = listOf(CheckoutItemDto(productId = "brg-001", quantity = 1)),
+            payment = CheckoutPaymentDto(method = "CASH", amountPaid = 50000L)
+        )
+
+        val response = client.post("/api/v1/sales/checkout") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody(json.encodeToString(CheckoutRequest.serializer(), checkoutReq))
+        }
+
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertTrue(response.bodyAsText().contains("UNAUTHORIZED"))
+    }
+
+    @Test
+    fun `checkout with spoofed X-User-Id uses authenticated cashier identity instead`() = setupTestApp {
+        val token = loginAsCashier()
+        val checkoutReq = CheckoutRequest(
+            items = listOf(CheckoutItemDto(productId = "brg-001", quantity = 1)),
+            payment = CheckoutPaymentDto(method = "CASH", amountPaid = 20000L)
+        )
+
+        // Kirim token kasir1 tetapi coba spoof X-User-Id: HACKER-999
+        val response = client.post("/api/v1/sales/checkout") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            header(HttpHeaders.Authorization, "Bearer $token")
+            header("X-User-Id", "HACKER-999")
+            setBody(json.encodeToString(CheckoutRequest.serializer(), checkoutReq))
+        }
+
+        assertEquals(HttpStatusCode.Created, response.status)
+        val resData = json.decodeFromString<CheckoutResponse>(response.bodyAsText())
+
+        // Pastikan kasir_id di database transaksi adalah ID kasir1, bukan HACKER-999
+        val txRes = client.get("/api/v1/transactions")
+        val txList = json.decodeFromString<List<TransactionHistoryItemDto>>(txRes.bodyAsText())
+        val tx = txList.first { it.transactionId == resData.transactionId }
+        assertEquals("22222222-2222-2222-2222-222222222222", tx.cashierId)
+    }
+
+    @Test
     fun `TC-04 checkout with quantity zero or negative returns 400 Bad Request`() = setupTestApp {
+        val token = loginAsCashier()
         val invalidReq = CheckoutRequest(
             items = listOf(CheckoutItemDto(productId = "brg-001", quantity = 0)),
             payment = CheckoutPaymentDto(method = "CASH", amountPaid = 50000L)
@@ -66,7 +120,7 @@ class SalesRoutesTest {
 
         val response = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(json.encodeToString(CheckoutRequest.serializer(), invalidReq))
         }
 
@@ -76,6 +130,7 @@ class SalesRoutesTest {
 
     @Test
     fun `TC-05 checkout exceeding physical stock returns 409 Conflict OUT_OF_STOCK`() = setupTestApp {
+        val token = loginAsCashier()
         // brg-001 di seed data memiliki stok 50
         val overStockReq = CheckoutRequest(
             items = listOf(CheckoutItemDto(productId = "brg-001", quantity = 9999)),
@@ -84,7 +139,7 @@ class SalesRoutesTest {
 
         val response = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(json.encodeToString(CheckoutRequest.serializer(), overStockReq))
         }
 
@@ -94,6 +149,7 @@ class SalesRoutesTest {
 
     @Test
     fun `TC-07 checkout idempotency double submit returns identical transaction without double deduction`() = setupTestApp {
+        val token = loginAsCashier()
         val idempotencyKey = "IDEMP-" + UUID.randomUUID().toString()
         val checkoutReq = CheckoutRequest(
             idempotencyKey = idempotencyKey,
@@ -104,7 +160,7 @@ class SalesRoutesTest {
         // Submit Pertama
         val res1 = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(json.encodeToString(CheckoutRequest.serializer(), checkoutReq))
         }
         assertEquals(HttpStatusCode.Created, res1.status)
@@ -113,7 +169,7 @@ class SalesRoutesTest {
         // Submit Kedua (Double submit dengan idempotencyKey yang sama)
         val res2 = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(json.encodeToString(CheckoutRequest.serializer(), checkoutReq))
         }
         assertEquals(HttpStatusCode.Created, res2.status)
@@ -127,6 +183,7 @@ class SalesRoutesTest {
 
     @Test
     fun `TC-09 cash payment less than total bill returns 400 Bad Request`() = setupTestApp {
+        val token = loginAsCashier()
         // brg-001 harga jual 11.500 * 2 = 23.000. Diberikan uang 10.000
         val underPaidReq = CheckoutRequest(
             items = listOf(CheckoutItemDto(productId = "brg-001", quantity = 2)),
@@ -135,7 +192,7 @@ class SalesRoutesTest {
 
         val response = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(json.encodeToString(CheckoutRequest.serializer(), underPaidReq))
         }
 
@@ -145,6 +202,7 @@ class SalesRoutesTest {
 
     @Test
     fun `TC-10 sales summary report accurately reconciles revenue with successful checkout`() = setupTestApp {
+        val token = loginAsCashier()
         // 1. Lakukan transaksi sukses: 3 x brg-003 (Aqua 4000) = 12.000
         val checkoutReq = CheckoutRequest(
             items = listOf(CheckoutItemDto(productId = "brg-003", quantity = 3)),
@@ -152,7 +210,7 @@ class SalesRoutesTest {
         )
         val checkoutRes = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $token")
             setBody(json.encodeToString(CheckoutRequest.serializer(), checkoutReq))
         }
         assertEquals(HttpStatusCode.Created, checkoutRes.status)
@@ -176,17 +234,18 @@ class SalesRoutesTest {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             setBody("""{"username":"admin","password":"admin123"}""")
         }
-        val loginData = json.decodeFromString<com.pos.server.dto.auth.LoginResponse>(loginRes.bodyAsText())
+        val loginData = json.decodeFromString<LoginResponse>(loginRes.bodyAsText())
         val adminToken = loginData.accessToken
 
-        // 2. Lakukan transaksi checkout
+        // 2. Lakukan transaksi checkout sebagai kasir
+        val cashierToken = loginAsCashier()
         val checkoutReq = CheckoutRequest(
             items = listOf(CheckoutItemDto(productId = "brg-001", quantity = 1)),
             payment = CheckoutPaymentDto(method = "CASH", amountPaid = 20000L)
         )
         val checkoutRes = client.post("/api/v1/sales/checkout") {
             header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            header("X-User-Id", "KASIR-01")
+            header(HttpHeaders.Authorization, "Bearer $cashierToken")
             setBody(json.encodeToString(CheckoutRequest.serializer(), checkoutReq))
         }
         assertEquals(HttpStatusCode.Created, checkoutRes.status)

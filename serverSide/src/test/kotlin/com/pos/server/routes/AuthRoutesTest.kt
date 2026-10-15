@@ -100,4 +100,45 @@ class AuthRoutesTest {
         assertEquals(HttpStatusCode.OK, employeeRes.status)
         assertTrue(employeeRes.bodyAsText().contains("admin"))
     }
+
+    @Test
+    fun `logout revokes token preventing further access to protected endpoints`() = setupTestApp {
+        // 1. Login sebagai admin
+        val loginRes = client.post("/api/v1/auth/login") {
+            header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            setBody("""{"username":"admin","password":"admin123"}""")
+        }
+        val adminToken = json.decodeFromString<LoginResponse>(loginRes.bodyAsText()).accessToken
+
+        // 2. Akses berhasil sebelum logout
+        val beforeLogout = client.get("/api/v1/employees") {
+            header(HttpHeaders.Authorization, "Bearer $adminToken")
+        }
+        assertEquals(HttpStatusCode.OK, beforeLogout.status)
+
+        // 3. Logout dan cabut token
+        val logoutRes = client.post("/api/v1/auth/logout") {
+            header(HttpHeaders.Authorization, "Bearer $adminToken")
+        }
+        assertEquals(HttpStatusCode.OK, logoutRes.status)
+
+        // 4. Akses ditolak setelah logout (401 Unauthorized)
+        val afterLogout = client.get("/api/v1/employees") {
+            header(HttpHeaders.Authorization, "Bearer $adminToken")
+        }
+        assertEquals(HttpStatusCode.Unauthorized, afterLogout.status)
+        assertTrue(afterLogout.bodyAsText().contains("UNAUTHORIZED"))
+    }
+
+    @Test
+    fun `forged token with known employee ID without active session returns 401 Unauthorized`() = setupTestApp {
+        // Coba bypass autentikasi dengan token palsu menggunakan ID admin yang diketahui
+        val forgedToken = "POS-TOKEN-11111111-1111-1111-1111-111111111111-fake-token"
+        val response = client.get("/api/v1/employees") {
+            header(HttpHeaders.Authorization, "Bearer $forgedToken")
+        }
+
+        assertEquals(HttpStatusCode.Unauthorized, response.status)
+        assertTrue(response.bodyAsText().contains("UNAUTHORIZED"))
+    }
 }
