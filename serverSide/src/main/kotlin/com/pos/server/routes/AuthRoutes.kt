@@ -1,5 +1,6 @@
 package com.pos.server.routes
 
+import com.pos.server.dto.auth.CreateEmployeeRequest
 import com.pos.server.dto.auth.LoginRequest
 import com.pos.server.dto.common.ApiErrorResponse
 import com.pos.server.service.AuthService
@@ -8,6 +9,8 @@ import io.ktor.server.application.call
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 
@@ -30,5 +33,45 @@ fun Route.authRoutes(authService: AuthService) {
             call.respond(HttpStatusCode.OK, mapOf("message" to "Berhasil keluar dari sesi."))
         }
     }
+
+    route("/employees") {
+        get {
+            val list = authService.getAllEmployees()
+            call.respond(HttpStatusCode.OK, list)
+        }
+
+        post {
+            try {
+                val req = call.receive<CreateEmployeeRequest>()
+                val res = authService.createEmployee(req)
+                call.respond(HttpStatusCode.Created, res)
+            } catch (e: IllegalArgumentException) {
+                call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", e.message ?: "Validasi gagal."))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, ApiErrorResponse("SERVER_ERROR", e.message ?: "Gagal menambah karyawan."))
+            }
+        }
+
+        post("/{id}/toggle") {
+            try {
+                val id = call.parameters["id"] ?: return@post call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", "ID diperlukan."))
+                val res = authService.toggleStatus(id)
+                call.respond(HttpStatusCode.OK, res)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.NotFound, ApiErrorResponse("NOT_FOUND", e.message ?: "Karyawan tidak ditemukan."))
+            }
+        }
+
+        delete("/{id}") {
+            try {
+                val id = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", "ID diperlukan."))
+                authService.deleteEmployee(id)
+                call.respond(HttpStatusCode.OK, mapOf("message" to "Karyawan berhasil dihapus."))
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, ApiErrorResponse("SERVER_ERROR", e.message ?: "Gagal menghapus karyawan."))
+            }
+        }
+    }
 }
+
 

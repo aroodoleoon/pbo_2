@@ -1,8 +1,12 @@
 package com.pos.server.service
 
+import com.pos.server.domain.enums.Role
 import com.pos.server.domain.exception.AksesDitolakException
 import com.pos.server.domain.exception.AutentikasiException
+import com.pos.server.domain.model.Admin
 import com.pos.server.domain.model.Karyawan
+import com.pos.server.domain.model.Kasir
+import com.pos.server.dto.auth.CreateEmployeeRequest
 import com.pos.server.dto.auth.LoginRequest
 import com.pos.server.dto.auth.LoginResponse
 import com.pos.server.dto.auth.UserResponse
@@ -38,6 +42,69 @@ class AuthService(
                 active = karyawan.aktif
             )
         )
+    }
+
+    fun getAllEmployees(): List<UserResponse> {
+        return karyawanRepository.findAll().map {
+            UserResponse(
+                id = it.id,
+                name = it.nama,
+                username = it.username,
+                role = it.role.name,
+                active = it.aktif
+            )
+        }
+    }
+
+    fun createEmployee(request: CreateEmployeeRequest): UserResponse {
+        val existing = karyawanRepository.findByUsername(request.username.trim())
+        if (existing != null) {
+            throw IllegalArgumentException("Username '${request.username}' sudah terdaftar.")
+        }
+
+        val role = try { Role.fromString(request.role) } catch (_: Exception) { Role.CASHIER }
+        val passwordHash = Karyawan.hitungHash(request.password)
+
+        val karyawan = when (role) {
+            Role.ADMIN -> Admin(
+                nama = request.name.trim(),
+                username = request.username.trim().lowercase(),
+                passwordHash = passwordHash,
+                aktif = true
+            )
+            Role.CASHIER -> Kasir(
+                nama = request.name.trim(),
+                username = request.username.trim().lowercase(),
+                passwordHash = passwordHash,
+                aktif = true
+            )
+        }
+
+        karyawanRepository.insert(karyawan)
+        return UserResponse(
+            id = karyawan.id,
+            name = karyawan.nama,
+            username = karyawan.username,
+            role = karyawan.role.name,
+            active = karyawan.aktif
+        )
+    }
+
+    fun toggleStatus(id: String): UserResponse {
+        val karyawan = getKaryawanById(id)
+        val newStatus = !karyawan.aktif
+        karyawanRepository.updateStatus(id, newStatus)
+        return UserResponse(
+            id = karyawan.id,
+            name = karyawan.nama,
+            username = karyawan.username,
+            role = karyawan.role.name,
+            active = newStatus
+        )
+    }
+
+    fun deleteEmployee(id: String) {
+        karyawanRepository.delete(id)
     }
 
     fun getKaryawanById(id: String): Karyawan {

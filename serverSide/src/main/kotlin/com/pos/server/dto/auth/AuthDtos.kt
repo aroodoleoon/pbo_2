@@ -23,3 +23,12 @@ data class LoginResponse(
     val user: UserResponse
 )
 
+@Serializable
+data class CreateEmployeeRequest(
+    val name: String,
+    val username: String,
+    val password: String,
+    val role: String = "CASHIER"
+)
+
+

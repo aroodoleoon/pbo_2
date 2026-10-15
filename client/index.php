@@ -32,6 +32,7 @@ use PosClient\Controllers\PosController;
 use PosClient\Controllers\InventoryController;
 use PosClient\Controllers\ReportController;
 use PosClient\Controllers\CustomerController;
+use PosClient\Controllers\CashierController;
 
 // 2. Initialize Session
 Session::start();
@@ -43,6 +44,7 @@ $posCtrl = new PosController($apiClient);
 $inventoryCtrl = new InventoryController($apiClient);
 $reportCtrl = new ReportController($apiClient);
 $customerCtrl = new CustomerController($apiClient);
+$cashierCtrl = new CashierController($apiClient);
 
 // 4. Request Routing
 $page = (string)($_GET['page'] ?? 'pos');
@@ -124,13 +126,18 @@ switch ($page) {
         $customerCtrl->create();
         break;
 
-    // Cashier Management Routes (Manager only)
+    // Cashier Management Routes (Admin only)
     case 'cashiers':
-        if (!\PosClient\Session::isLoggedIn()) {
-            header('Location: ?page=login');
-            exit;
-        }
-        require __DIR__ . '/views/cashiers.php';
+        $cashierCtrl->index();
+        break;
+    case 'do-create-cashier':
+        $cashierCtrl->create();
+        break;
+    case 'do-toggle-cashier':
+        $cashierCtrl->toggle();
+        break;
+    case 'do-delete-cashier':
+        $cashierCtrl->delete();
         break;
 
     default:

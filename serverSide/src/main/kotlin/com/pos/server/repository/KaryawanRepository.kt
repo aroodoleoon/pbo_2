@@ -90,5 +90,19 @@ class KaryawanRepository(private val dataSource: DataSource) {
             }
         }
     }
+
+    fun delete(id: String) {
+        try {
+            val sql = "DELETE FROM karyawan WHERE id = ?"
+            dataSource.connection.use { c ->
+                c.prepareStatement(sql).use { s ->
+                    s.setString(1, id)
+                    s.executeUpdate()
+                }
+            }
+        } catch (_: Exception) {
+            updateStatus(id, false)
+        }
+    }
 }
 
