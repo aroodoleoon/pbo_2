@@ -28,6 +28,11 @@ object DatabaseFactory {
         // Sinkronisasi skema & seed secara aman tanpa memutus koneksi PostgreSQL jika sudah ada data
         try {
             ds.connection.use { c ->
+                try {
+                    c.createStatement().use { s ->
+                        s.execute("ALTER TABLE IF EXISTS pergerakan_stok DROP CONSTRAINT IF EXISTS pergerakan_stok_jenis_check;")
+                    }
+                } catch (_: Exception) {}
                 initSchemaAndSeed(c)
             }
         } catch (e: Exception) {

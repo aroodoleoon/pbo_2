@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS pergerakan_stok (
     id VARCHAR(80) PRIMARY KEY,
     barang_id VARCHAR(80) NOT NULL REFERENCES barang(id),
     karyawan_id VARCHAR(80) NOT NULL REFERENCES karyawan(id),
-    jenis TEXT NOT NULL CHECK (jenis IN ('IN', 'OUT', 'ADJUSTMENT')),
+    jenis TEXT NOT NULL CHECK (jenis IN ('IN', 'OUT', 'ADJUSTMENT', 'OUT_SALE', 'OUT_DAMAGED', 'OUT_LOST', 'OUT_OTHER', 'CANCEL_SALE')),
     jumlah INTEGER NOT NULL CHECK (jumlah > 0),
     alasan TEXT NOT NULL,
     dibuat_pada TIMESTAMPTZ NOT NULL DEFAULT now()
