@@ -1,5 +1,6 @@
 package com.pos.server.plugins
 
+import com.mongodb.client.MongoDatabase
 import com.pos.server.repository.*
 import com.pos.server.routes.*
 import com.pos.server.service.*
@@ -8,7 +9,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import javax.sql.DataSource
 
-fun Application.configureRouting(dataSource: DataSource) {
+fun Application.configureRouting(dataSource: DataSource, mongoDatabase: MongoDatabase? = null) {
     // 1. Inisialisasi Repository
     val barangRepo = BarangRepository(dataSource)
     val kategoriRepo = KategoriRepository(dataSource)
@@ -16,8 +17,10 @@ fun Application.configureRouting(dataSource: DataSource) {
     val karyawanRepo = KaryawanRepository(dataSource)
     val pelangganRepo = PelangganRepository(dataSource)
     val transaksiRepo = TransaksiRepository(dataSource)
+    val auditLogRepo = AuditLogRepository(dataSource, mongoDatabase)
 
-    // 2. Inisialisasi Service (Menghubungkan Modul 2, 3, 4, 5)
+    // 2. Inisialisasi Service (Menghubungkan Seluruh Modul)
+    val auditLogService = AuditLogService(auditLogRepo)
     val inventoryService = InventoryService(barangRepo, pergerakanStokRepo)
     val productService = ProductService(barangRepo, kategoriRepo)
     val authService = AuthService(karyawanRepo)
@@ -29,19 +32,19 @@ fun Application.configureRouting(dataSource: DataSource) {
     // 3. Routing API
     routing {
         route("/api/v1") {
-            authRoutes(authService)
+            authRoutes(authService, auditLogService)
             productRoutes(productService)
             inventoryRoutes(inventoryService)
             customerRoutes(customerService)
-            salesRoutes(salesService, paymentService)
+            salesRoutes(salesService, paymentService, auditLogService)
             reportRoutes(reportService)
+            auditLogRoutes(auditLogService, authService)
         }
 
         // Backward compatibility dengan root route /api dari Modul 5
         route("/api") {
-            salesRoutes(salesService, paymentService)
+            salesRoutes(salesService, paymentService, auditLogService)
             reportRoutes(reportService)
         }
     }
 }
-

@@ -31,5 +31,9 @@ class AuditLogService(
             System.err.println("[AUDIT LOG ERROR] Gagal mencatat audit log: ${e.message}")
         }
     }
+
+    fun getRecentLogs(limit: Int = 50): List<AuditLog> {
+        return auditLogRepository.getRecentLogs(limit)
+    }
 }
 

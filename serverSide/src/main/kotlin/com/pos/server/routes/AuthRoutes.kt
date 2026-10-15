@@ -15,14 +15,32 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 
-fun Route.authRoutes(authService: AuthService) {
+fun Route.authRoutes(authService: AuthService, auditLogService: com.pos.server.service.AuditLogService? = null) {
     route("/auth") {
         post("/login") {
+            var attemptedUsername = ""
             try {
                 val req = call.receive<LoginRequest>()
+                attemptedUsername = req.username
                 val res = authService.login(req)
+                auditLogService?.log(
+                    actorId = res.user.id,
+                    action = "LOGIN",
+                    entityType = "AUTH",
+                    entityId = res.user.id,
+                    result = "SUCCESS",
+                    metadata = """{"username":"${req.username}","role":"${res.user.role}"}"""
+                )
                 call.respond(HttpStatusCode.OK, res)
             } catch (e: Exception) {
+                auditLogService?.log(
+                    actorId = null,
+                    action = "LOGIN",
+                    entityType = "AUTH",
+                    entityId = attemptedUsername.ifBlank { "unknown" },
+                    result = "FAILED",
+                    metadata = """{"reason":"${e.message}"}"""
+                )
                 call.respond(
                     HttpStatusCode.Unauthorized,
                     ApiErrorResponse("UNAUTHORIZED", e.message ?: "Login gagal.")

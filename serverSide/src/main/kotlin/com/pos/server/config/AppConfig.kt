@@ -7,7 +7,8 @@ data class DatabaseConfig(
 )
 
 data class AppConfig(
-    val dbConfig: DatabaseConfig
+    val dbConfig: DatabaseConfig,
+    val mongoUri: String
 ) {
     companion object {
         fun load(): AppConfig {
@@ -22,12 +23,15 @@ data class AppConfig(
                 if (rawUrl.contains("?")) "$rawUrl&stringtype=unspecified" else "$rawUrl?stringtype=unspecified"
             } else rawUrl
 
+            val mongoUri = System.getenv("MONGO_URI") ?: "mongodb://localhost:27017/pos_logs"
+
             return AppConfig(
                 dbConfig = DatabaseConfig(
                     url = url,
                     user = user,
                     pass = pass
-                )
+                ),
+                mongoUri = mongoUri
             )
         }
     }

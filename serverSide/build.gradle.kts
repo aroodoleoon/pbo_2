@@ -30,6 +30,7 @@ dependencies {
     // Database & Driver
     implementation("org.postgresql:postgresql:42.7.4")
     implementation("com.h2database:h2:2.3.232")
+    implementation("org.mongodb:mongodb-driver-sync:5.1.4")
 
     // Logging
     implementation("ch.qos.logback:logback-classic:$logbackVersion")

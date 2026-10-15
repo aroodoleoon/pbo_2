@@ -14,15 +14,35 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 
-fun Route.salesRoutes(salesService: SalesService, paymentService: PaymentService) {
+fun Route.salesRoutes(
+    salesService: SalesService,
+    paymentService: PaymentService,
+    auditLogService: com.pos.server.service.AuditLogService? = null
+) {
     route("/sales") {
         post("/checkout") {
+            val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"
             try {
-                val cashierId = call.request.headers["X-User-Id"] ?: "CASHIER-01"
                 val req = call.receive<com.pos.server.dto.sales.CheckoutRequest>()
                 val res = paymentService.checkout(cashierId, req)
+                auditLogService?.log(
+                    actorId = cashierId,
+                    action = "CHECKOUT",
+                    entityType = "TRANSACTION",
+                    entityId = res.transactionId,
+                    result = "SUCCESS",
+                    metadata = """{"invoiceNumber":"${res.transactionNumber}","totalAmount":${res.total},"paymentMethod":"${res.payment?.method ?: ""}"}"""
+                )
                 call.respond(HttpStatusCode.Created, res)
             } catch (e: com.pos.server.domain.exception.StokTidakCukupException) {
+                auditLogService?.log(
+                    actorId = cashierId,
+                    action = "CHECKOUT",
+                    entityType = "TRANSACTION",
+                    entityId = null,
+                    result = "FAILED_OUT_OF_STOCK",
+                    metadata = """{"reason":"${e.message}"}"""
+                )
                 call.respond(HttpStatusCode.Conflict, ApiErrorResponse("OUT_OF_STOCK", e.message ?: "Stok barang tidak mencukupi."))
             } catch (e: com.pos.server.domain.exception.ValidasiException) {
                 call.respond(HttpStatusCode.BadRequest, ApiErrorResponse("BAD_REQUEST", e.message ?: "Validasi checkout gagal."))

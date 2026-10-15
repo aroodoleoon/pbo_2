@@ -19,11 +19,12 @@ fun main() {
 fun Application.module() {
     val config = AppConfig.load()
     val dataSource = DatabaseFactory.createDataSource(config.dbConfig)
+    val mongoDb = com.pos.server.config.MongoFactory.getDatabase(config.mongoUri)
 
     configureSerialization()
     configureStatusPages()
     configureCallLogging()
     configureSecurity()
-    configureRouting(dataSource)
+    configureRouting(dataSource, mongoDb)
 }
 
